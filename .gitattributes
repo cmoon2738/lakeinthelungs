@@ -1,0 +1,5 @@
+assets/* linguist-vendored
+build/* linguist-vendored
+docs/* linguist-vendored
+cross/* linguist-vendored
+external/* linguist-vendored
