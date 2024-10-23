@@ -1,14 +1,14 @@
 #include "hadopelagic.h"
 #include "headless.h"
 
-bool HadalHeadless_Connect(void)
+bool HadalHeadless_connect(void)
 {
     LogVerbose("HADAL: running headless...");
 
     const HadalAPI headless = {
         .id = HADAL_BACKEND_HEADLESS,
-        .init = HadalHeadless_Init,
-        .terminate = HadalHeadless_Terminate,
+        .init = HadalHeadless_init,
+        .terminate = HadalHeadless_terminate,
 #ifdef LAKE_NATIVE_VULKAN
         .vkPhysicalDevicePresentationSupport = HadalHeadless_vkPhysicalDevicePresentationSupport,
         .vkCreateSurface = HadalHeadless_vkCreateSurface,
@@ -24,11 +24,11 @@ bool HadalHeadless_Connect(void)
     return true;
 }
 
-i32 HadalHeadless_Init(void)
+i32 HadalHeadless_init(void)
 {
     return LAKE_SUCCESS;
 }
 
-void HadalHeadless_Terminate(void)
+void HadalHeadless_terminate(void)
 {
 }

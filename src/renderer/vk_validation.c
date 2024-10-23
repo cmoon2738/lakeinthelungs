@@ -57,7 +57,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_callback(VkDebugUtilsMessageSe
 	return VK_FALSE;
 }
 
-void RanaVK_CreateValidationLayers(VkInstance instance)
+void VulkanCreateValidationLayers(VkInstance instance)
 {
     if (validation_messenger == VK_NULL_HANDLE) {
         VkDebugUtilsMessengerCreateInfoEXT callback_info = {
@@ -79,7 +79,7 @@ void RanaVK_CreateValidationLayers(VkInstance instance)
     }
 }
 
-void RanaVK_DestroyValidationLayers(VkInstance instance)
+void VulkanDestroyValidationLayers(VkInstance instance)
 {
     if (validation_messenger != VK_NULL_HANDLE) {
         vkDestroyDebugUtilsMessengerEXT(instance, validation_messenger, NULL);
@@ -88,7 +88,7 @@ void RanaVK_DestroyValidationLayers(VkInstance instance)
     }
 }
 
-const char *RanaVK_Result(VkResult code)
+const char *VulkanResult(VkResult code)
 {
 #define ERRSTR(r) case VK_ ##r: return "VK_"#r
 	switch (code) {

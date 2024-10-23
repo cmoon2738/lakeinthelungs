@@ -2,7 +2,7 @@
 #define _LAKE_vk_h_
 
 #include "../common.h"
-#include "../platform/hadal.h"
+#include "rana.h"
 
 #ifndef VK_NO_PROTOTYPES
     #define VK_NO_PROTOTYPES
@@ -41,29 +41,29 @@
 #define RANA_VK_MAX_FRAMES 3 /* 3 -> triple buffering */
 
 /** Loads the Vulkan driver and initializes the API. */
-extern bool RanaVK_OpenDriver(void);
-extern void RanaVK_CloseDriver(void);
+extern bool VulkanOpenDriver(void);
+extern void VulkanCloseDriver(void);
 
 /** Loads instance function pointers. */
-extern void RanaVK_LoadInstancePointers(VkInstance instance);
+extern void VulkanLoadInstancePointers(VkInstance instance);
 
 /** Loads device function pointers. Those are not suitable 
  *  for use with multiple concurrent devices. */
-extern void RanaVK_LoadDevicePointers(VkDevice device);
+extern void VulkanLoadDevicePointers(VkDevice device);
 
 /** Vulkan driver version. */
-extern uint32_t RanaVK_Version(void);
+extern u32 VulkanVersion(void);
 
 /** Returns a string for a given VkResult. */
-extern const char *RanaVK_Result(VkResult code);
+extern const char *VulkanResult(VkResult code);
 
 #if defined(LAKE_DEBUG) && !defined(LAKE_NDEBUG)
-    #define RANA_VK_VERIFY(x) {                                               \
-        VkResult res = (x);                                                   \
-        if (res != VK_SUCCESS) {                                              \
-            LogError("VkResult verification failed: %s", RanaVK_Result(res)); \
-            Assert(res == VK_SUCCESS);                                        \
-        }                                                                     \
+    #define RANA_VK_VERIFY(x) {                                              \
+        VkResult res = (x);                                                  \
+        if (res != VK_SUCCESS) {                                             \
+            LogError("VkResult verification failed: %s", VulkanResult(res)); \
+            Assert(res == VK_SUCCESS);                                       \
+        }                                                                    \
     }
 #else
     #define RANA_VK_VERIFY(x) (void)(x)
@@ -71,30 +71,39 @@ extern const char *RanaVK_Result(VkResult code);
 
 typedef enum {
     RANA_VK_EXT_BIT__VK_LAYER_KHRONOS_validation        = 0x1,
-    RANA_VK_EXT_BIT__VK_EXT_debug_utils                 = 0x2,
-    RANA_VK_EXT_BIT__VK_KHR_surface                     = 0x4,
-    RANA_VK_EXT_BIT__VK_KHR_swapchain                   = 0x8,
-    RANA_VK_EXT_BIT__VK_KHR_dynamic_rendering           = 0x10,
+    RANA_VK_EXT_BIT__VK_KHR_surface                     = 0x2,
+    RANA_VK_EXT_BIT__VK_KHR_swapchain                   = 0x4,
+    RANA_VK_EXT_BIT__VK_KHR_dynamic_rendering           = 0x8,
+    RANA_VK_EXT_BIT__VK_EXT_debug_utils                 = 0x10,
     RANA_VK_EXT_BIT__VK_KHR_shader_non_semantic_info    = 0x20,
 } VulkanExtensions;
 
-extern void RanaVK_CreateValidationLayers(VkInstance instance);
-extern void RanaVK_DestroyValidationLayers(VkInstance instance);
+extern void     CreateValidationLayers(VkInstance instance);
+extern void     DestroyValidationLayers(VkInstance instance);
 
-extern char *RanaVK_GetSurfaceExtension(void);
-extern bool RanaVK_PhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family);
-extern VkResult RanaVK_CreateSurface(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
+extern char    *VulkanGetSurfaceExtension(void);
+extern bool     VulkanPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family);
+extern VkResult VulkanCreateSurface(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 
-/* Renderer Vulkan backend context */
+/* Per context Vulkan state */
+typedef struct RanaVulkanContext {
+    VkSurfaceKHR            surface;
+} RanaVulkanContext;
+
+/* Renderer global Vulkan state: RANA.vk */
 typedef struct RanaVulkan {
-    u32 ext_available;
-    u32 ext_enabled;
+    u32     ext_available;
+    u32     ext_enabled;
+    void   *module;
 
     VkInstance              instance;
-    VkSurfaceKHR            surface;
     VkPhysicalDevice        physical_device;
     VkDevice                device;
 } RanaVulkan;
+
+/* Rana backend API */
+i32  RanaVulkan_init(void);
+void RanaVulkan_terminate(void);
 
 /* up to date with version 1.3.294 */
 #if defined(VK_VERSION_1_0)

@@ -1,6 +1,7 @@
 sources += files(
     'init.c',
     'headless.c',
+    'window.c',
 )
 
 subdir('unix')

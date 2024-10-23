@@ -25,6 +25,7 @@
 
 struct HadalWindow {
     HadalWindow *next;
+
     char        *title;
     u32          flags;
 

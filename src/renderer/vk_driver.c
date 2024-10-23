@@ -1,7 +1,5 @@
 #include "../platform/system.h"
-#include "vk.h"
-
-static void *loaded_module = NULL;
+#include "renderer.h"
 
 static void gen_load_loader(void *context, PFN_vkVoidFunction (*load)(void *, const char *));
 static void gen_load_instance(void *context, PFN_vkVoidFunction (*load)(void *, const char *));
@@ -24,9 +22,11 @@ static PFN_vkVoidFunction nullProcAddrStub(void *context, const char *name)
     return NULL;
 }
 
-bool RanaVK_OpenDriver(void)
+bool VulkanOpenDriver(void)
 {
     void *module;
+
+    LogVerbose("RANA: try connecting to Vulkan...");
 #if defined(LAKE_PLATFORM_WINDOWS)
     module = SysLoadDLL("vulkan-1.dll");
 
@@ -53,40 +53,54 @@ bool RanaVK_OpenDriver(void)
     if (!module)
         module = SysLoadDLL("libvulkan.so");
 #endif
-    if (!module)
+    if (!module) {
+        LogDebug("RANA: can't connect to the Vulkan driver.");
         return false;
+    }
     vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)SysGetProcAddress(module, "vkGetInstanceProcAddr");
 
-    loaded_module = module;
     gen_load_loader(NULL, vkGetInstanceProcAddrStub);
+
+    RanaAPI vulkan = {
+        .id = RANA_BACKEND_VULKAN,
+        .init = RanaVulkan_init,
+        .terminate = RanaVulkan_terminate,
+    };
+    if (!_RanaDebugVerifyAPI(&vulkan)) {
+        LogDebug("RANA: internal API for Vulkan is not up to date.");
+        return false;
+    }
+
+    RANA.vk.module = module;
+    RANA.api = vulkan;
 
     return true;
 }
 
-void RanaVK_CloseDriver(void)
+void VulkanCloseDriver(void)
 {
-    if (loaded_module) 
-        SysCloseDLL(loaded_module);
+    if (RANA.vk.module) 
+        SysCloseDLL(RANA.vk.module);
 
     vkGetInstanceProcAddr = NULL;
     gen_load_loader(NULL, nullProcAddrStub);
     gen_load_instance(NULL, nullProcAddrStub);
     gen_load_device(NULL, nullProcAddrStub);
 
-    loaded_module = NULL;
+    RANA.vk.module = NULL;
 }
 
-void RanaVK_LoadInstancePointers(VkInstance instance)
+void VulkanLoadInstancePointers(VkInstance instance)
 {
     gen_load_instance(instance, vkGetInstanceProcAddrStub);
 }
 
-void RanaVK_LoadDevicePointers(VkDevice device)
+void VulkanLoadDevicePointers(VkDevice device)
 {
     gen_load_device(device, vkGetDeviceProcAddrStub);
 }
 
-uint32_t RanaVK_Version(void)
+uint32_t VulkanVersion(void)
 {
 #if defined(VK_VERSION_1_1)
     uint32_t api_version = 0;

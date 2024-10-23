@@ -3,6 +3,8 @@
 
 #include "common.h"
 #include "core/events.h"
+#include "platform/hadal.h"
+#include "renderer/rana.h"
 
 typedef void (*PFN_AppInit)(void *data);
 typedef void (*PFN_AppFrame)(void *data, f64 delta_time);
@@ -28,6 +30,8 @@ typedef struct AMWEngine {
     f64 delta_time;
 
     AppDescription *app;
+    HadalWindow    *window;
+    RanaContext    *rana;
 } AMWEngine;
 
 /** Global 'A Moonlit Walk' engine state context */

@@ -23,6 +23,7 @@ static void cleanup(void)
 {
     AMW.app->clean(AMW.app->data);
 
+    RanaTerminate();
     HadalTerminate();
 
     TicksQuit();
@@ -65,6 +66,10 @@ static void AMoonlitWalk(AppDescription *app_desc)
     LogSetLevel(option_log_level);
 
     HadalInit(option_hadal_backend);
+    AMW.window = HadalCreateWindow(800, 600, AMW.app->name, NULL);
+
+    RanaInit(RANA_ANY_BACKEND);
+    AMW.rana = RanaCreateContext(AMW.window);
 
     AMW.app->init(AMW.app->data);
 
@@ -175,7 +180,7 @@ static bool hadal_backend_from_string(const char *str, u32 *id)
     return true;
 }
 
-static AppDescription AppMain(int32_t argc, char **argv)
+static AppDescription AppMain(i32 argc, char **argv)
 {
     AppDescription app_desc;
 
@@ -230,7 +235,7 @@ static AppDescription AppMain(int32_t argc, char **argv)
     /* TODO */
     (void)argc;
     (void)argv;
-#endif /* LAKE_PLATFORM_UNIX */
+#endif /* windows/unix, parsing arguments */
 
     switch (option_app_main) {
     case APP_MAIN_LAKE:
@@ -272,7 +277,7 @@ static char **command_line_to_utf8_argv(LPWSTR w_command_line, i32 *o_argc)
 
         i32 n;
         for (i32 i = 0; i < argc; ++i) {
-            n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (int32_t)size, NULL, NULL);
+            n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (i32)size, NULL, NULL);
             if (n == 0) {
                 LogError("Win32 got a 0 length argument");
                 break;
@@ -339,7 +344,7 @@ JNIEXPORT void ANativeActivity_onCreate(ANativeActivity* activity,
 
 /* LINUX BSD UNIX */
 #else
-int main(int argc, char **argv)
+i32 main(i32 argc, char **argv)
 {
     AppDescription app_desc = AppMain(argc, argv);
     AMoonlitWalk(&app_desc);

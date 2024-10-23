@@ -1,5 +1,12 @@
 sources += files(
+    'renderer.c',
+    'context.c',
+)
+
+# Vulkan backend
+sources += files(
     'vk_driver.c',
+    'vk_rana.c',
     'vk_shaders.c',
     'vk_surface.c',
     'vk_validation.c',
