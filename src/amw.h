@@ -1,5 +1,5 @@
-#ifndef _LAKE_internal_h_
-#define _LAKE_internal_h_
+#ifndef _LAKE_amw_h_
+#define _LAKE_amw_h_
 
 #include "common.h"
 #include "core/events.h"
@@ -33,4 +33,4 @@ typedef struct AMWEngine {
 /** Global 'A Moonlit Walk' engine state context */
 extern AMWEngine AMW;
 
-#endif /* _LAKE_internal_h_ */
+#endif /* _LAKE_amw_h_ */

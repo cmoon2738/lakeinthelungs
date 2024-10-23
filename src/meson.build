@@ -4,7 +4,7 @@ sources += files(
 
 subdir('asm')
 subdir('platform')
-subdir('vulkan')
+subdir('renderer')
 subdir('audio')
 subdir('core')
 

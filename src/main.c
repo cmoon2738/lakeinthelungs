@@ -1,7 +1,10 @@
 #include "common.h"
-#include "internal.h"
-#include "lake/lake.h"
 #include "platform/system.h"
+#include "platform/hadal.h"
+#include "renderer/rana.h"
+#include "amw.h"
+
+#include "lake/lake.h"
 
 #include <stdio.h>
 
@@ -14,10 +17,13 @@ AMWEngine AMW = {0};
 #define APP_MAIN_LAKE 1
 static u32 option_app_main = APP_MAIN_LAKE; 
 static u32 option_log_level = LOG_VERBOSE; 
+static u32 option_hadal_backend = HADAL_ANY_BACKEND;
 
 static void cleanup(void)
 {
     AMW.app->clean(AMW.app->data);
+
+    HadalTerminate();
 
     TicksQuit();
     Zero(AMW);
@@ -58,6 +64,8 @@ static void AMoonlitWalk(AppDescription *app_desc)
     TicksInit();
     LogSetLevel(option_log_level);
 
+    HadalInit(option_hadal_backend);
+
     AMW.app->init(AMW.app->data);
 
     run_mainloop();
@@ -74,14 +82,35 @@ NORETURN static void print_version(FILE *f)
 NORETURN static void print_usage(FILE *f) 
 {
     const char *usage = 
-        "usage: jezioro [-l <log_level>] [-m <application>]"
+        "usage: lakeinthelungs [-m <application>] [-d <display>] [-l <log_level>]"
         "\n\n"
-        "   -l <log_level>      Set a log scope, where <log_level> is one of:\n"
-        "                       'verbose' (default), 'debug', 'info', 'warn', 'error', 'fatal'.\n"
-        "\n"
         "   -m <application>    What demo to run from the main entry point, where <application>\n"
         "                       is one of: 'lake' (default).\n"
         "\n"
+        "   -l <log_level>      Set a log scope, where <log_level> is one of:\n"
+        "                       'verbose' (default), 'debug', 'info', 'warn', 'error', 'fatal'.\n"
+        "\n"
+        "   -d <display>        What display/platform backend to run, where <display> is one of:\n"
+        "                       'auto' (default), 'headless'"
+#if defined(LAKE_PLATFORM_WINDOW)
+        ", 'win32'"
+#elif defined(LAKE_PLATFORM_MACOSX)
+        ", 'cocoa'"
+#elif defined(LAKE_PLATFORM_IOS)
+        ", 'ios'"
+#elif defined(LAKE_PLATFORM_ANDROID)
+        ", 'android'"
+#endif
+#if defined(LAKE_NATIVE_WAYLAND)
+        ", 'wayland'"
+#endif
+#if defined(LAKE_NATIVE_XCB)
+        ", 'xcb'"
+#endif
+#if defined(LAKE_NATIVE_KMS)
+        ", 'kms'"
+#endif
+        "\n\n"
         "   -h                  Displays this help message.\n"
         "\n"
         "   -v                  Prints the version.\n"
@@ -120,6 +149,32 @@ static bool app_main_from_string(const char *str, u32 *app)
     return true;
 }
 
+static bool hadal_backend_from_string(const char *str, u32 *id)
+{
+    if ((strcmp(str, "auto")) == 0) {
+        *id = HADAL_ANY_BACKEND;
+    } else if ((strcmp(str, "win32")) == 0) {
+        *id = HADAL_BACKEND_WIN32;
+    } else if ((strcmp(str, "cocoa")) == 0) {
+        *id = HADAL_BACKEND_COCOA;
+    } else if ((strcmp(str, "ios")) == 0) {
+        *id = HADAL_BACKEND_IOS;
+    } else if ((strcmp(str, "android")) == 0) {
+        *id = HADAL_BACKEND_ANDROID;
+    } else if ((strcmp(str, "wayland")) == 0) {
+        *id = HADAL_BACKEND_WAYLAND;
+    } else if ((strcmp(str, "xcb")) == 0) {
+        *id = HADAL_BACKEND_XCB;
+    } else if ((strcmp(str, "kms")) == 0) {
+        *id = HADAL_BACKEND_KMS;
+    } else if ((strcmp(str, "headless")) == 0) {
+        *id = HADAL_BACKEND_HEADLESS;
+    } else {
+        return false;
+    }
+    return true;
+}
+
 static AppDescription AppMain(int32_t argc, char **argv)
 {
     AppDescription app_desc;
@@ -132,7 +187,7 @@ static AppDescription AppMain(int32_t argc, char **argv)
      *
      * The initial ':' in the optstring makes getopt return ':' when an option
      * is missing a required argument. */
-    static const char *optstring = "+:hvl:m:";
+    static const char *optstring = "+:hvm:d:l:";
     i32 opt;
 
     while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -141,13 +196,19 @@ static AppDescription AppMain(int32_t argc, char **argv)
         case 'v': print_version(stderr);
         case 'l':
             if (!log_level_from_string(optarg, &option_log_level)) {
-                fprintf(stderr, "Option '-%c' given bad log level.\n", optopt);
+                fprintf(stderr, "Option '-l' given bad log level.\n");
+                print_usage(stderr);
+            }
+            break;
+        case 'd':
+            if (!hadal_backend_from_string(optarg, &option_hadal_backend)) {
+                fprintf(stderr, "Option '-d' given bad display backend.\n");
                 print_usage(stderr);
             }
             break;
         case 'm':
             if (!app_main_from_string(optarg, &option_app_main)) {
-                fprintf(stderr, "Option '-%c' given bad display mode.\n", optopt);
+                fprintf(stderr, "Option '-m' given bad application entry point.\n");
                 print_usage(stderr);
             }
             break;

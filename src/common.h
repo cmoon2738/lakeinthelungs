@@ -1710,4 +1710,9 @@ INLINE f32 Bswapf(f32 x) {
     #define BswapfBE(x)  (x)
 #endif       
 
+typedef enum {
+    LAKE_SUCCESS = 0,
+    LAKE_ERROR_STUB = -1, // FIXME update later all return code messages using this
+} LakeResult;
+
 #endif /* _LAKE_common_h_ */

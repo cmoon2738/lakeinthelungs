@@ -1,8 +1,28 @@
-if sys == 'linux' or sys == 'bsd'
+if sys == 'android' or sys == 'linux' or sys == 'bsd'
     sources += files(
         'linux_os.c',
     )
 
+    # DRM/KMS
+    dep_udev = dependency('libudev', required : get_option('kms'))
+    dep_drm = dependency('libdrm', required : get_option('kms'))
+    dep_gbm = dependency('gbm', required : get_option('kms'))
+    build_drmkms = dep_drm.found() and dep_gbm.found() and not get_option('kms').disabled()
+
+    if build_drmkms
+        #sources += files('')
+
+        defs += [
+            '-DLAKE_NATIVE_KMS=1',
+            '-DVK_USE_PLATFORM_KMS_KHR' ]
+        deps += [ dep_udev, dep_drm, dep_gbm ]
+        enabled_display_backends += [ 'kms' ]
+    endif
+
+    defs += '-DLAKE_PLATFORM_LINUX=1'
+endif
+
+if sys == 'linux' or sys == 'bsd'
     # Wayland
     dep_wayland_client = dependency('wayland-client', required : get_option('wayland'))
     dep_wayland_protocols = dependency('wayland-protocols', version : '>= 1.12', required : get_option('wayland'))
@@ -10,7 +30,6 @@ if sys == 'linux' or sys == 'bsd'
     wayland_scanner = find_program('wayland-scanner', required : get_option('wayland'))
     build_wayland = (dep_wayland_client.found() and dep_wayland_protocols.found() and
                         wayland_scanner.found() and dep_xkbcommon.found())
-
     if build_wayland
         sources += files(
             'wl_display.c',
@@ -73,7 +92,6 @@ if sys == 'linux' or sys == 'bsd'
     dep_xcb = dependency('xcb', required : get_option('xcb'))
     dep_xcb_icccm = dependency('xcb-icccm', required : get_option('xcb'))
     build_xcb = dep_xcb.found() and dep_xcb_icccm.found()
-
     if build_xcb
         #sources += files('')
 
@@ -83,22 +101,4 @@ if sys == 'linux' or sys == 'bsd'
         deps += [ dep_xcb, dep_xcb_icccm ]
         enabled_display_backends += [ 'xcb' ]
     endif
-
-    # DRM/KMS
-    dep_udev = dependency('libudev', required : get_option('kms'))
-    dep_drm = dependency('libdrm', required : get_option('kms'))
-    dep_gbm = dependency('gbm', required : get_option('kms'))
-    build_drmkms = dep_drm.found() and dep_gbm.found() and not get_option('kms').disabled()
-
-    if build_drmkms
-        #sources += files('')
-
-        defs += [
-            '-DLAKE_NATIVE_KMS=1',
-            '-DVK_USE_PLATFORM_KMS_KHR' ]
-        deps += [ dep_udev, dep_drm, dep_gbm ]
-        enabled_display_backends += [ 'kms' ]
-    endif
-
-    defs += '-DLAKE_PLATFORM_LINUX=1'
 endif
