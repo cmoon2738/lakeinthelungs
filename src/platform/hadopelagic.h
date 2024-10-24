@@ -1,16 +1,17 @@
 #ifndef _AMW_hadopelagic_h_
 #define _AMW_hadopelagic_h_
 
-//#include "system.h"
+#include "../common.h"
+#include "system.h"
 #include "hadal.h"
 #include "headless.h"
 
-#ifdef LAKE_PLATFORM_UNIX
+#ifdef AMW_PLATFORM_UNIX
     #include <unistd.h>
     #include <poll.h>
 #endif
 
-#ifdef LAKE_NATIVE_WAYLAND
+#ifdef AMW_NATIVE_WAYLAND
     #include "linux/wl.h"
     #define HADOPELAGIC_WAYLAND_WINDOW_STATE WindowWayland wl;
     #define HADOPELAGIC_WAYLAND_GLOBAL_STATE HadopelagicWayland wl;
@@ -19,7 +20,7 @@
     #define HADOPELAGIC_WAYLAND_GLOBAL_STATE
 #endif
 
-#ifdef LAKE_NATIVE_VULKAN
+#ifdef AMW_NATIVE_VULKAN
     #include "../renderer/vk.h"
 #endif
 
@@ -41,7 +42,7 @@ typedef struct HadalAPI {
     i32  (*init)(void);
     void (*terminate)(void);
 
-#ifdef LAKE_NATIVE_VULKAN
+#ifdef AMW_NATIVE_VULKAN
     bool     (*vkPhysicalDevicePresentationSupport)(VkPhysicalDevice pd, u32 queue_family);
     VkResult (*vkCreateSurface)(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 #endif
@@ -64,6 +65,6 @@ extern Hadopelagic HADAL;
 
 /* INTERNAL API */
 
-extern bool _HadalDebugVerifyAPI(const HadalAPI *api);
+extern bool _hadal_debug_verify_api(const HadalAPI *api);
 
 #endif /* _AMW_hadopelagic_h_ */

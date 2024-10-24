@@ -1,8 +1,8 @@
 #include "hadopelagic.h"
 
-Window *HadalCreateWindow(u32 width, u32 height, const char *title, Window *share)
+Window *hadal_create_window(u32 width, u32 height, const char *title, Window *share)
 {
-    LogVerbose("HADAL: creating a new window!");
+    log_verbose("HADAL: creating a new window!");
     (void)width;
     (void)height;
     (void)title;
@@ -10,15 +10,15 @@ Window *HadalCreateWindow(u32 width, u32 height, const char *title, Window *shar
     return NULL;
 }
 
-void HadalDestroyWindow(Window *window)
+void hadal_destroy_window(Window *window)
 {
-    LogVerbose("HADAL: destroying a window!");
+    log_verbose("HADAL: destroying a window!");
     if (window) {
         /* TODO */
     }    
 }
 
-u32 HadalGetFlags(Window *window)
+u32 hadal_get_flags(Window *window)
 {
     if (window)
         return window->flags;

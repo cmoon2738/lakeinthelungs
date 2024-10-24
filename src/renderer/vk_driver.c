@@ -1,3 +1,4 @@
+#include "vk.h"
 #include "../platform/system.h"
 #include "renderer.h"
 
@@ -22,42 +23,42 @@ static PFN_vkVoidFunction nullProcAddrStub(void *context, const char *name)
     return NULL;
 }
 
-bool VulkanOpenDriver(void)
+bool vulkan_open_driver(void)
 {
     void *module;
 
-    LogVerbose("RANA: try connecting to Vulkan...");
-#if defined(LAKE_PLATFORM_WINDOWS)
-    module = SysLoadDLL("vulkan-1.dll");
+    log_verbose("RANA: try connecting to Vulkan...");
+#if defined(AMW_PLATFORM_WINDOWS)
+    module = sys_load_dll("vulkan-1.dll");
 
-#elif defined(LAKE_PLATFORM_MACOSX) || defined(LAKE_PLATFORM_IOS)
-    module = SysLoadDLL("libvulkan.dylib");
+#elif defined(AMW_PLATFORM_APPLE)
+    module = sys_load_dll("libvulkan.dylib");
     if (!module)
-        module = SysLoadDLL("libvulkan.1.dylib");
+        module = sys_load_dll("libvulkan.1.dylib");
     if (!module)
-        module = SysLoadDLL("libMoltenVK.dylib");
+        module = sys_load_dll("libMoltenVK.dylib");
     /* Add support for using Vulkan and MoltenVK in a Framework. App store rules for iOS
      * strictly enforce no .dylib's. If they aren't found it just falls through */
     if (!module)
-        module = SysLoadDLL("vulkan.framework/vulkan");
+        module = sys_load_dll("vulkan.framework/vulkan");
     if (!module)
-        module = SysLoadDLL("MoltenVK.framework/MoltenVK");
+        module = sys_load_dll("MoltenVK.framework/MoltenVK");
     /* modern versions of macOS don't search /usr/local/lib automatically contrary to what man dlopen says
 	 * Vulkan SDK uses this as the system-wide installation location, 
      * so we're going to fallback to this if all else fails */
     if (!module && getenv("DYLD_FALLBACK_LIBRARY_PATH") == NULL)
-        module = SysLoadDLL("/usr/local/lib/libvulkan.dylib");
+        module = sys_load_dll("/usr/local/lib/libvulkan.dylib");
 
 #else /* LINUX / BSD / ANDROID */
-    module = SysLoadDLL("libvulkan.so.1");
+    module = sys_load_dll("libvulkan.so.1");
     if (!module)
-        module = SysLoadDLL("libvulkan.so");
+        module = sys_load_dll("libvulkan.so");
 #endif
     if (!module) {
-        LogDebug("RANA: can't connect to the Vulkan driver.");
+        log_debug("RANA: can't connect to the Vulkan driver.");
         return false;
     }
-    vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)SysGetProcAddress(module, "vkGetInstanceProcAddr");
+    vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)sys_get_proc_address(module, "vkGetInstanceProcAddr");
 
     gen_load_loader(NULL, vkGetInstanceProcAddrStub);
 
@@ -66,8 +67,8 @@ bool VulkanOpenDriver(void)
         .init = RanaVulkan_init,
         .terminate = RanaVulkan_terminate,
     };
-    if (!_RanaDebugVerifyAPI(&vulkan)) {
-        LogDebug("RANA: internal API for Vulkan is not up to date.");
+    if (!_rana_debug_verify_api(&vulkan)) {
+        log_debug("RANA: internal API for Vulkan is not up to date.");
         return false;
     }
 
@@ -77,10 +78,10 @@ bool VulkanOpenDriver(void)
     return true;
 }
 
-void VulkanCloseDriver(void)
+void vulkan_close_driver(void)
 {
     if (RANA.vk.module) 
-        SysCloseDLL(RANA.vk.module);
+        sys_close_dll(RANA.vk.module);
 
     vkGetInstanceProcAddr = NULL;
     gen_load_loader(NULL, nullProcAddrStub);
@@ -90,20 +91,20 @@ void VulkanCloseDriver(void)
     RANA.vk.module = NULL;
 }
 
-void VulkanLoadInstancePointers(VkInstance instance)
+void vulkan_load_instance_pointers(VkInstance instance)
 {
     gen_load_instance(instance, vkGetInstanceProcAddrStub);
 }
 
-void VulkanLoadDevicePointers(VkDevice device)
+void vulkan_load_device_pointers(VkDevice device)
 {
     gen_load_device(device, vkGetDeviceProcAddrStub);
 }
 
-uint32_t VulkanVersion(void)
+u32 vulkan_version(void)
 {
 #if defined(VK_VERSION_1_1)
-    uint32_t api_version = 0;
+    u32 api_version = 0;
     if (vkEnumerateInstanceVersion && vkEnumerateInstanceVersion(&api_version) == VK_SUCCESS)
         return api_version;
 #endif

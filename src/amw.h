@@ -37,4 +37,4 @@ typedef struct AMWEngine {
 /** Global 'A Moonlit Walk' engine state context */
 extern AMWEngine AMW;
 
-#endif /* _LAKE_amw_h_ */
+#endif /* _AMW_h_ */

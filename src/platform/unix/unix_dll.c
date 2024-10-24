@@ -2,27 +2,27 @@
 
 #include <dlfcn.h>
 
-void *SysLoadDLL(const char *libname)
+void *sys_load_dll(const char *libname)
 {
-    Assert(libname);
+    assert_debug(libname);
     void *handle = dlopen(libname, RTLD_NOW | RTLD_LOCAL);
     if (!handle)
-        LogError("SysLoadDLL: dlopen '%s' failed: %s", libname, dlerror());
+        log_error("sys_load_dll: dlopen '%s' failed: %s", libname, dlerror());
     return handle;
 }
 
-void SysCloseDLL(void *handle)
+void sys_close_dll(void *handle)
 {
-    Assert(handle);
+    assert_debug(handle);
     dlclose(handle);
 }
 
-void *SysGetProcAddress(void *handle, const char *procname)
+void *sys_get_proc_address(void *handle, const char *procname)
 {
-    Assert(handle && procname);
+    assert_debug(handle && procname);
     const char *error;
     void *addr = dlsym(handle, procname);
     if ((error = dlerror()) != NULL) 
-        LogError("SysGetProcAddress: dlsym '%s' failed: %s", procname, error);
+        log_error("sys_get_proc_address: dlsym '%s' failed: %s", procname, error);
     return addr;
 }

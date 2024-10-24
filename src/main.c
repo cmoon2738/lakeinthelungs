@@ -8,8 +8,11 @@
 
 #include <stdio.h>
 
-#ifdef LAKE_PLATFORM_UNIX
-#include <unistd.h>
+#ifdef AMW_PLATFORM_UNIX
+    #include <unistd.h>
+#elif AMW_PLATFORM_WINDOWS
+    #include <windows.h>
+    #include <wchar.h>
 #endif
 
 AMWEngine AMW = {0};
@@ -23,22 +26,22 @@ static void cleanup(void)
 {
     AMW.app->clean(AMW.app->data);
 
-    RanaTerminate();
-    HadalTerminate();
+    rana_terminate();
+    hadal_terminate();
 
-    TicksQuit();
-    Zero(AMW);
+    ticks_quit();
+    zero(AMW);
 }
 
 static void run_mainloop(void)
 {
-    u64 time_now = SysTimerCounter();
+    u64 time_now = sys_timer_counter();
     u64 time_last = 0;
 
-    while (!ReadFlags(AMW.flags, AMW_FLAG_SHOULD_QUIT)) {
+    while (!read_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT)) {
         time_last = time_now;
-        time_now = SysTimerCounter();
-        AMW.delta_time = (f64)((time_now - time_last)*1000 / (f64)SysTimerFrequency());
+        time_now = sys_timer_counter();
+        AMW.delta_time = (f64)((time_now - time_last)*1000 / (f64)sys_timer_frequency());
 
         Event *event = NULL;
         /* TODO poll from the event loop */
@@ -52,24 +55,24 @@ static void run_mainloop(void)
 
         AMW.app->frame(AMW.app->data, AMW.delta_time);
 
-        SetFlags(AMW.flags, AMW_FLAG_SHOULD_QUIT);
+        set_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT);
     }
     /* When the main loop returns, the fiber job system 
      * will destroy all threads (except the main one) */
 }
 
-static void AMoonlitWalk(AppDescription *app_desc)
+static void a_moonlit_walk(AppDescription *app_desc)
 {
     AMW.app = app_desc;
 
-    TicksInit();
-    LogSetLevel(option_log_level);
+    ticks_init();
+    log_set_level(option_log_level);
 
-    HadalInit(option_hadal_backend);
-    AMW.window = HadalCreateWindow(800, 600, AMW.app->name, NULL);
+    hadal_init(option_hadal_backend);
+    AMW.window = hadal_create_window(800, 600, AMW.app->name, NULL);
 
-    RanaInit(RANA_ANY_BACKEND);
-    AMW.rana = RanaCreateContext(AMW.window);
+    rana_init(RANA_ANY_BACKEND);
+    AMW.rana = rana_create_context(AMW.window);
 
     AMW.app->init(AMW.app->data);
 
@@ -81,7 +84,7 @@ NORETURN static void print_version(FILE *f)
 {
     fprintf(f, "A MoonlitWalk Engine ver. %d.%d.%d", 
             AMW_VERSION_MAJOR, AMW_VERSION_MINOR, AMW_VERSION_REVISION);
-    SysExit(0);
+    sys_exit(0);
 }
 
 NORETURN static void print_usage(FILE *f) 
@@ -121,7 +124,7 @@ NORETURN static void print_usage(FILE *f)
         "   -v                  Prints the version.\n"
         ;
     fprintf(f, "%s", usage);
-    SysExit(0);
+    sys_exit(0);
 }
 
 static bool log_level_from_string(const char *str, u32 *level)
@@ -180,11 +183,11 @@ static bool hadal_backend_from_string(const char *str, u32 *id)
     return true;
 }
 
-static AppDescription AppMain(i32 argc, char **argv)
+static AppDescription amw_main(i32 argc, char **argv)
 {
     AppDescription app_desc;
 
-#ifdef LAKE_PLATFORM_UNIX
+#ifdef AMW_PLATFORM_UNIX
     /* Setting '+' in the optstring is the same as setting POSIXLY_CORRECT in
      * the enviroment. It tells getopt to stop parsing argv when it encounters
      * the first non-option argument; it also prevents getopt from permuting
@@ -224,14 +227,14 @@ static AppDescription AppMain(i32 argc, char **argv)
             fprintf(stderr, "Option '-%c' requires an argument.\n", optopt);
             print_usage(stderr);
         default:
-            SysExit(0);
+            sys_exit(0);
         }
     }
     if (optind != argc) {
         fprintf(stderr, "Error trailing arguments.\n");
         print_usage(stderr);
     }
-#elif LAKE_PLATFORM_WINDOWS
+#elif AMW_PLATFORM_WINDOWS
     /* TODO */
     (void)argc;
     (void)argv;
@@ -240,24 +243,20 @@ static AppDescription AppMain(i32 argc, char **argv)
     switch (option_app_main) {
     case APP_MAIN_LAKE:
     default:
-        app_desc.init = LakeInit;
-        app_desc.frame = LakeFrame;
-        app_desc.event = LakeEvent;
-        app_desc.clean = LakeClean;
+        app_desc.init = lake_init;
+        app_desc.frame = lake_frame;
+        app_desc.event = lake_event;
+        app_desc.clean = lake_clean;
         app_desc.data = NULL;
         app_desc.name = "Lake in the Lungs";
         app_desc.version = AMW_VERSION;
         break;
     }
-
     return app_desc;
 }
 
 /* WINDOWS */
-#if defined(LAKE_PLATFORM_WINDOWS)
-#include <windows.h>
-#include <wchar.h>
-
+#if defined(AMW_PLATFORM_WINDOWS)
 static char **command_line_to_utf8_argv(LPWSTR w_command_line, i32 *o_argc)
 {
     i32 argc = 0;
@@ -270,16 +269,16 @@ static char **command_line_to_utf8_argv(LPWSTR w_command_line, i32 *o_argc)
     } else {
         size_t size = wcslen(w_command_line) * 4;
         void *ptr_argv = malloc(((size_t)argc + 1) * sizeof(char *) + size);
-        Zerop(ptr_argv);
+        zerop(ptr_argv);
         argv = (char **)ptr_argv;
-        AssertRelease(argv);
+        assert_release(argv);
         args = (char *)&argv[argc + 1];
 
         i32 n;
         for (i32 i = 0; i < argc; ++i) {
             n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (i32)size, NULL, NULL);
             if (n == 0) {
-                LogError("Win32 got a 0 length argument");
+                log_error("Win32 got a 0 length argument");
                 break;
             }
             argv[i] = args;
@@ -295,9 +294,9 @@ static char **command_line_to_utf8_argv(LPWSTR w_command_line, i32 *o_argc)
 #ifdef PLATFORM_WINDOWS_FORCE_MAIN
 i32 main(i32 argc, char **argv)
 {
-    AppDescription app_desc = AppMain(argc, argv);
-    AMoonlitWalk(&app_desc);
-    SysExit(0);
+    AppDescription app_desc = amw_main(argc, argv);
+    a_moonlit_walk(&app_desc);
+    sys_exit(0);
 }
 #else
 i32 WINAPI WinMain(_In_ HINSTANCE hInstance, 
@@ -313,11 +312,11 @@ i32 WINAPI WinMain(_In_ HINSTANCE hInstance,
     i32 argc_utf8 = 0;
     char **argv_utf8 = command_line_to_utf8_argv(GetCommandLineW(), &argc_utf8);
 
-    AppDescription app_desc = AppMain(argc_utf8, argv_utf8);
-    AMoonlitWalk(&app_desc);
+    AppDescription app_desc = amw_main(argc_utf8, argv_utf8);
+    a_moonlit_walk(&app_desc);
 
     free(argv_utf8);
-    SysExit(0);
+    sys_exit(0);
 }
 #endif /* PLATFORM_WINDOWS_FORCE_MAIN */
 
@@ -346,8 +345,8 @@ JNIEXPORT void ANativeActivity_onCreate(ANativeActivity* activity,
 #else
 i32 main(i32 argc, char **argv)
 {
-    AppDescription app_desc = AppMain(argc, argv);
-    AMoonlitWalk(&app_desc);
-    SysExit(0);
+    AppDescription app_desc = amw_main(argc, argv);
+    a_moonlit_walk(&app_desc);
+    sys_exit(0);
 }
 #endif

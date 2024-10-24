@@ -1381,7 +1381,7 @@ extern u64  ticks_ns(void);
 #elif HAS_BUILTIN(__debugbreak)
     #define debugtrap() __debugbreak()
 #endif
-#if !defined(DebugTrap)
+#if !defined(debugtrap)
     #if defined(CC_MSVC_VERSION) || defined(CC_INTEL_VERSION)
         #define debugtrap() __debugbreak()
     #elif defined(CC_ARM_VERSION)
@@ -1421,22 +1421,23 @@ extern u64  ticks_ns(void);
     #endif
 #endif
 
+/* static_assert */
 #if defined(__cplusplus)
     #if (__cplusplus >= 201103L)
-        #define static_assertion(x,desc) static_assert(x,desc)
+         #define assert_static(x,desc) static_assert(x,desc)
     #endif
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 202311L)
-    #define static_assertion(x,desc) static_assert(x,desc)
+     #define assert_static(x,desc) static_assert(x,desc)
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-    #define static_assertion(x,desc) _Static_assert(x,desc)
+    #define assert_static(x,desc) _Static_assert(x,desc)
 /* GCC 4.6 or later */
 #elif CC_GNUC_VERSION_CHECK(4,6,0)
     /* It will work but it may throw a warning:
      * warning: ISO C99 does not support '_Static_assert' [-Wpedantic] */
-    #define static_assertion(x,desc) _Static_assert(x,desc)
+    #define assert_static(x,desc) _Static_assert(x,desc)
 #endif
-#ifndef static_assertion
-    #define static_assertion(x,desc)
+#ifndef assert_static
+    #define assert_static(x,desc)
 #endif
 #ifndef ASSERT_LEVEL
     #ifdef DEFAULT_ASSERT_LEVEL
@@ -1458,24 +1459,24 @@ extern u64  ticks_ns(void);
     } while (false)
 
 /* This assertion is never disabled at any level. */
-#define assertion_always(condition) ENABLED_ASSERT(condition)
+#define assert_always(condition) ENABLED_ASSERT(condition)
 
 #if ASSERT_LEVEL == 0   /* assertions disabled */
-    #define assertion(condition)          DISABLED_ASSERT(condition)
-    #define assertion_release(condition)  DISABLED_ASSERT(condition)
-    #define assertion_paranoid(condition) DISABLED_ASSERT(condition)
+    #define assert_debug(condition)    DISABLED_ASSERT(condition)
+    #define assert_release(condition)  DISABLED_ASSERT(condition)
+    #define assert_paranoid(condition) DISABLED_ASSERT(condition)
 #elif ASSERT_LEVEL == 1  /* release settings. */
-    #define assertion(condition)          DISABLED_ASSERT(condition)
-    #define assertion_release(condition)  ENABLED_ASSERT(condition)
-    #define assertion_paranoid(condition) DISABLED_ASSERT(condition)
-#elif ASSERT_LEVEL == 2  /* normal settings. */
-    #define assertion(condition)          ENABLED_ASSERT(condition)
-    #define assertion_release(condition)  ENABLED_ASSERT(condition)
-    #define assertion_paranoid(condition) DISABLED_ASSERT(condition)
+    #define assert_debug(condition)    DISABLED_ASSERT(condition)
+    #define assert_release(condition)  ENABLED_ASSERT(condition)
+    #define assert_paranoid(condition) DISABLED_ASSERT(condition)
+#elif ASSERT_LEVEL == 2  /* debug settings. */
+    #define assert_debug(condition)    ENABLED_ASSERT(condition)
+    #define assert_release(condition)  ENABLED_ASSERT(condition)
+    #define assert_paranoid(condition) DISABLED_ASSERT(condition)
 #elif ASSERT_LEVEL == 3  /* paranoid settings. */
-    #define assertion(condition)          ENABLED_ASSERT(condition)
-    #define assertion_release(condition)  ENABLED_ASSERT(condition)
-    #define assertion_paranoid(condition) ENABLED_ASSERT(condition)
+    #define assert_debug(condition)    ENABLED_ASSERT(condition)
+    #define assert_release(condition)  ENABLED_ASSERT(condition)
+    #define assert_paranoid(condition) ENABLED_ASSERT(condition)
 #else
     #error Unknown assertion level. Use: 0-disabled, 1-release, 2-debug, 3-paranoid.
 #endif

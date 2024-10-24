@@ -21,29 +21,29 @@ static const char *backend_string(u32 id)
 }
 
 static const struct { u32 id; bool (*connect)(void); } supported_backends[] = {
-#if defined(LAKE_PLATFORM_WINDOWS)
+#if defined(AMW_PLATFORM_WINDOWS)
     /* TODO */
-#elif defined(LAKE_PLATFORM_MACOSX)
+#elif defined(AMW_PLATFORM_MACOSX)
     /* TODO */
-#elif defined(LAKE_PLATFORM_IOS)
+#elif defined(AMW_PLATFORM_IOS)
     /* TODO */
-#elif defined(LAKE_PLATFORM_ANDROID)
+#elif defined(AMW_PLATFORM_ANDROID)
     /* TODO */
 #endif
-#ifdef LAKE_NATIVE_WAYLAND
+#ifdef AMW_NATIVE_WAYLAND
     { HADAL_BACKEND_WAYLAND, HadalWayland_connect},
 #endif
-#ifdef LAKE_NATIVE_XCB
+#ifdef AMW_NATIVE_XCB
     /* TODO */
 #endif
-#ifdef LAKE_NATIVE_KMS
+#ifdef AMW_NATIVE_KMS
     /* TODO */
 #endif
 };
 
 static bool select_backend(u32 id) 
 {
-    const size_t count = ArraySize(supported_backends);
+    const size_t count = array_size(supported_backends);
 
     if (id != HADAL_ANY_BACKEND &&
         id != HADAL_BACKEND_WIN32 &&
@@ -55,19 +55,19 @@ static bool select_backend(u32 id)
         id != HADAL_BACKEND_KMS &&
         id != HADAL_BACKEND_HEADLESS)
     {
-        LogError("HADAL: invalid backend ID '%X : %s'", id, backend_string(id));
+        log_error("HADAL: invalid backend ID '%X : %s'", id, backend_string(id));
         return false;
     }
 
     /* only allow headless mode if explicitly requested */
     if (id == HADAL_BACKEND_HEADLESS) {
         if (!HadalHeadless_connect()) {
-            LogError("HADAL: failed to initialize headless mode.");
+            log_error("HADAL: failed to initialize headless mode.");
             return false;
         }
         return true; 
     } else if (count == 0) {
-        LogError("HADAL: this binary supports only headless platform. Headless mode must be called explicitly.");
+        log_error("HADAL: this binary supports only headless platform. Headless mode must be called explicitly.");
         return false;
     }
 
@@ -79,33 +79,33 @@ static bool select_backend(u32 id)
             if (supported_backends[i].connect())
                 return true;
         }
-        LogError("HADAL: failed to detect any supported backends.");
+        log_error("HADAL: failed to detect any supported backends.");
     } else {
         for (size_t i = 0; i < count; i++) {
             if (supported_backends[i].id == id)
                 return supported_backends[i].connect();
         }
-        LogError("HADAL: the requested backend is not supported");
+        log_error("HADAL: the requested backend is not supported");
     }
     return false;
 }
 
-u32 HadalCurrentBackendID(void)
+u32 hadal_current_backend_id(void)
 {
     if (HADAL.initialized)
         return HADAL.api.id;
     return HADAL_ANY_BACKEND;
 }
 
-bool HadalBackendIsSupported(u32 platform_id)
+bool hadal_backend_is_supported(u32 backend_id)
 {
-    const size_t count = ArraySize(supported_backends);
+    const size_t count = array_size(supported_backends);
     size_t i;
 
-    if (platform_id == HADAL_BACKEND_HEADLESS)
+    if (backend_id == HADAL_BACKEND_HEADLESS)
         return true;
     for (i = 0; i < count; i++) {
-        if (platform_id == supported_backends[i].id)
+        if (backend_id == supported_backends[i].id)
             return true;
     }
     return false;
@@ -113,10 +113,10 @@ bool HadalBackendIsSupported(u32 platform_id)
 
 static void terminate(void)
 {
-    LogVerbose("HADAL: terminating...");
+    log_verbose("HADAL: terminating...");
 
     for (Window *window = HADAL.window_list_head; window; window = window->next) {
-        HadalDestroyWindow(window);
+        hadal_destroy_window(window);
     }
 
     if (HADAL.api.terminate)
@@ -124,55 +124,57 @@ static void terminate(void)
 
     // TODO mutex
 
-    Zero(HADAL);
+    zero(HADAL);
 }
 
-i32 HadalInit(u32 backend_id)
+i32 hadal_init(u32 backend_id)
 {
     if (HADAL.initialized)
-        return LAKE_SUCCESS;
+        return AMW_SUCCESS;
 
-    LogVerbose("HADAL: initializing...");
+    log_verbose("HADAL: initializing...");
 
     if (backend_id <= 0)
         backend_id = HADAL_ANY_BACKEND;
 
     if (!select_backend(backend_id))
-        return LAKE_ERROR_STUB;
+        return AMW_ERROR_STUB;
 
     // TODO mutex
 
     HADAL.api.init();
 
     HADAL.initialized = true;
-    return LAKE_SUCCESS;
+    return AMW_SUCCESS;
 }
 
-void HadalTerminate(void)
+void hadal_terminate(void)
 {
     if (HADAL.initialized)
         terminate();
 }
 
-bool _HadalDebugVerifyAPI(const HadalAPI *api)
+bool _hadal_debug_verify_api(const HadalAPI *api)
 {
     bool out = true;
 
-#if defined(LAKE_DEBUG) && !defined(LAKE_NDEBUG)
-    Assert(api != NULL);
+#if defined(AMW_DEBUG) && !defined(AMW_NDEBUG)
+    assert_debug(api != NULL);
     const char *backend = backend_string(api->id);
 
 #define HADAL_APICHECK(fn) \
-        if (api->fn == NULL) { LogDebug("HADAL: missing call in internal api - '%s_%s'", backend, #fn); out = false; }
+        if (api->fn == NULL) { log_debug("HADAL: missing call in internal api - '%s_%s'", backend, #fn); out = false; }
 
     HADAL_APICHECK(init)
     HADAL_APICHECK(terminate)
-#ifdef LAKE_NATIVE_VULKAN
+#ifdef AMW_NATIVE_VULKAN
     HADAL_APICHECK(vkPhysicalDevicePresentationSupport)
     HADAL_APICHECK(vkCreateSurface)
-#endif /* Vulkan */
+#endif /* AMW_NATIVE_VULKAN */
     
 #undef HADAL_APICHECK
-#endif /* LAKE_DEBUG */
+#else
+    (void)api;
+#endif /* AMW_DEBUG */
     return out;
 }

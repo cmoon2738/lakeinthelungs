@@ -23,6 +23,16 @@ typedef struct Arena {
     Slice *end;
 } Arena;
 
+#define MEMORY_ARENA_BACKEND_LIBC_MALLOC 0
+/* TODO possible backends:
+ * - Linux mmap 
+ * - Win32 virtualalloc
+ * - WebAssembly heapbase */
+
+#ifndef MEMORY_ARENA_BACKEND
+    #define MEMORY_ARENA_BACKEND MEMORY_ARENA_BACKEND_LIBC_MALLOC
+#endif
+
 extern Slice *new_slice(size_t capacity);
 extern void   free_slice(Slice *slice);
 

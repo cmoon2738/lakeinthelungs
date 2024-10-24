@@ -37,6 +37,6 @@ typedef union Event {
     u8 padding[48];
 } Event;
 
-static_assertion(sizeof(Event) == sizeof(((Event *)NULL)->padding), "Event union padding is not large enough");
+assert_static(sizeof(Event) == sizeof(((Event *)NULL)->padding), "Event union padding is not large enough");
 
 #endif /* _AMW_events_h_ */

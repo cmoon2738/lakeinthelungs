@@ -1,9 +1,10 @@
+#include "platform/hadal.h"
 #include "vk.h"
 #include "../platform/hadopelagic.h"
 
-char *VulkanGetSurfaceExtension(void)
+char *vulkan_get_surface_extension(void)
 {
-    u32 id = HadalCurrentBackendID();
+    u32 id = hadal_current_backend_id();
     switch (id) {
 #ifdef VK_USE_PLATFORM_WIN32_KHR
         case HADAL_BACKEND_WIN32:
@@ -38,34 +39,34 @@ char *VulkanGetSurfaceExtension(void)
     }
 }
 
-bool VulkanPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
+bool vulkan_physical_device_presentation_support(VkPhysicalDevice pd, u32 queue_family)
 {
     if (!HADAL.initialized)
         return false;
-    Assert(pd != VK_NULL_HANDLE);
+    assert_debug(pd != VK_NULL_HANDLE);
     return HADAL.api.vkPhysicalDevicePresentationSupport(pd, queue_family);
 }
 
-VkResult VulkanCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+VkResult vulkan_create_surface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
 {
-    Assert(surface != NULL);
+    assert_debug(surface != NULL);
     *surface = VK_NULL_HANDLE;
 
     if (!HADAL.initialized)
         return VK_ERROR_INITIALIZATION_FAILED;
-    Assert(window != NULL);
-    Assert(instance != VK_NULL_HANDLE);
+    assert_debug(window != NULL);
+    assert_debug(instance != VK_NULL_HANDLE);
 
     return HADAL.api.vkCreateSurface(instance, window, allocator, surface);
 }
 
-#if defined(LAKE_PLATFORM_WINDOWS)
-#elif defined(LAKE_PLATFORM_MACOSX)
-#elif defined(LAKE_PLATFORM_IOS)
-#elif defined(LAKE_PLATFORM_ANDROID)
+#if defined(AMW_PLATFORM_WINDOWS)
+#elif defined(AMW_PLATFORM_MACOSX)
+#elif defined(AMW_PLATFORM_IOS)
+#elif defined(AMW_PLATFORM_ANDROID)
 #endif /* WINDOWS / APPLE / ANDROID */
 
-#if defined(LAKE_NATIVE_WAYLAND)
+#if defined(AMW_NATIVE_WAYLAND)
 bool HadalWayland_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
 {
     return vkGetPhysicalDeviceWaylandPresentationSupportKHR ?
@@ -77,23 +78,23 @@ VkResult HadalWayland_vkCreateSurface(VkInstance instance, Window *window, const
     VkResult out;
     VkWaylandSurfaceCreateInfoKHR wlsc_info;
 
-    Zero(wlsc_info);
+    zero(wlsc_info);
     wlsc_info.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
     wlsc_info.display = HADAL.wl.display;
     wlsc_info.surface = window->wl.surface;
 
     out = vkCreateWaylandSurfaceKHR(instance, &wlsc_info, allocator, surface);
     if (out != VK_SUCCESS)
-        LogError("Failed to create a Wayland VkSurface: %s", VulkanResult(out));
+        log_error("Failed to create a Wayland VkSurface: %s", vulkan_result(out));
     return out;
 }
-#endif /* LAKE_NATIVE_WAYLAND */
+#endif /* AMW_NATIVE_WAYLAND */
 
-#if defined(LAKE_NATIVE_XCB)
-#endif /* LAKE_NATIVE_XCB */
+#if defined(AMW_NATIVE_XCB)
+#endif /* AMW_NATIVE_XCB */
 
-#if defined(LAKE_NATIVE_KMS)
-#endif /* LAKE_NATIVE_KMS */
+#if defined(AMW_NATIVE_KMS)
+#endif /* AMW_NATIVE_KMS */
 
 bool HadalHeadless_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
 {

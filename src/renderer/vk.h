@@ -41,29 +41,29 @@
 #define RANA_VK_MAX_FRAMES 3 /* 3 -> triple buffering */
 
 /** Loads the Vulkan driver and initializes the API. */
-extern bool VulkanOpenDriver(void);
-extern void VulkanCloseDriver(void);
+extern bool vulkan_open_driver(void);
+extern void vulkan_close_driver(void);
 
 /** Loads instance function pointers. */
-extern void VulkanLoadInstancePointers(VkInstance instance);
+extern void vulkan_load_instance_pointers(VkInstance instance);
 
 /** Loads device function pointers. Those are not suitable 
  *  for use with multiple concurrent devices. */
-extern void VulkanLoadDevicePointers(VkDevice device);
+extern void vulkan_load_device_pointers(VkDevice device);
 
 /** Vulkan driver version. */
-extern u32 VulkanVersion(void);
+extern u32 vulkan_version(void);
 
 /** Returns a string for a given VkResult. */
-extern const char *VulkanResult(VkResult code);
+extern const char *vulkan_result(VkResult code);
 
-#if defined(LAKE_DEBUG) && !defined(LAKE_NDEBUG)
-    #define RANA_VK_VERIFY(x) {                                              \
-        VkResult res = (x);                                                  \
-        if (res != VK_SUCCESS) {                                             \
-            LogError("VkResult verification failed: %s", VulkanResult(res)); \
-            Assert(res == VK_SUCCESS);                                       \
-        }                                                                    \
+#if defined(AMW_DEBUG) && !defined(AMW_NDEBUG)
+    #define RANA_VK_VERIFY(x) {                                                \
+        VkResult res = (x);                                                    \
+        if (res != VK_SUCCESS) {                                               \
+            log_error("VkResult verification failed: %s", vulkan_result(res)); \
+            assert_debug(res == VK_SUCCESS);                                   \
+        }                                                                      \
     }
 #else
     #define RANA_VK_VERIFY(x) (void)(x)
@@ -71,31 +71,31 @@ extern const char *VulkanResult(VkResult code);
 
 typedef enum {
     /* instance */
-    RANA_VK_EXT_SURFACE_BIT                  = 0x00000001, /**< VK_KHR_surface */
+    RANA_VK_EXT_SURFACE_BIT = 0,                /**< VK_KHR_surface */
 
     /* device */
-    RANA_VK_EXT_SWAPCHAIN_BIT                = 0x00000002, /**< VK_KHR_swapchain */
-    RANA_VK_EXT_DYNAMIC_RENDERING_BIT        = 0x00000004, /**< VK_KHR_dynamic_rendering */
-    RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT     = 0x00000008, /**< VK_KHR_ray_tracing_pipeline */
+    RANA_VK_EXT_SWAPCHAIN_BIT,                  /**< VK_KHR_swapchain */
+    RANA_VK_EXT_DYNAMIC_RENDERING_BIT,          /**< VK_KHR_dynamic_rendering */
+    RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT,       /**< VK_KHR_ray_tracing_pipeline */
 
     /* layers */
-    RANA_VK_EXT_DEBUG_UTILS_BIT              = 0x10000000, /**< VK_EXT_debug_utils */
-    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT = 0x20000000, /**< VK_KHR_shader_non_semantic_info */
-    RANA_VK_EXT_VALIDATION_LAYERS_BIT        = 0x40000000, /**< VK_LAYER_KHRONOS_validation */
+    RANA_VK_EXT_DEBUG_UTILS_BIT,                /**< VK_EXT_debug_utils */
+    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT,   /**< VK_KHR_shader_non_semantic_info */
+    RANA_VK_EXT_VALIDATION_LAYERS_BIT,          /**< VK_LAYER_KHRONOS_validation */
 } VulkanExtensions;
 
 /* vk_validation.c */
-extern void     VulkanCreateValidationLayers(VkInstance instance);
-extern void     VulkanDestroyValidationLayers(VkInstance instance);
+extern void     vulkan_create_validation_layers(VkInstance instance);
+extern void     vulkan_destroy_validation_layers(VkInstance instance);
 
 /* vk_surface.c */
-extern char    *VulkanGetSurfaceExtension(void); /* from Hadal's backend */
-extern bool     VulkanPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family);
-extern VkResult VulkanCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
+extern char    *vulkan_get_surface_extension(void); /* from Hadal's backend */
+extern bool     vulkan_physical_device_presentation_support(VkPhysicalDevice pd, u32 queue_family);
+extern VkResult vulkan_create_surface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 
 /* Per context Vulkan state */
 typedef struct RanaVulkanContext {
-    VkSurfaceKHR            surface;
+    VkSurfaceKHR surface;
 } RanaVulkanContext;
 
 /* Renderer global Vulkan state: RANA.vk */

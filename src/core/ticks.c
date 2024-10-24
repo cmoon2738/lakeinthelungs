@@ -22,7 +22,7 @@ void ticks_init(void)
     if (tick_start)
         return;
 
-    tick_freq = SysTimerFrequency();
+    tick_freq = sys_timer_frequency();
     assert_debug(tick_freq > 0 && tick_freq <= (u64)UINT32_MAX);
 
     gcd = calculate_gcd(MS_PER_SECOND, (u32)tick_freq);
@@ -33,7 +33,7 @@ void ticks_init(void)
     tick_numerator_ns = (NS_PER_SECOND / gcd);
     tick_denominator_ns = (u32)(tick_freq / gcd);
 
-    tick_start = SysTimerCounter();
+    tick_start = sys_timer_counter();
 
     if (!tick_start)
         --tick_start;
@@ -58,7 +58,7 @@ u64 ticks_ms(void)
     return value;
 }
 
-u64 TicksNS(void)
+u64 ticks_ns(void)
 {
     u64 starting_value, value;
 

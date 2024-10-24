@@ -1,29 +1,29 @@
 #include "lake.h"
 
-void LakeInit(void *data)
+void lake_init(void *data)
 {
     (void)data;
 
-    LogInfo("init mlem");
+    log_info("init mlem");
 }
 
-void LakeFrame(void *data, f64 delta_time)
+void lake_frame(void *data, f64 delta_time)
 {
     (void)data;
     (void)delta_time;
 
-    LogDebug("frame mlem");
+    log_debug("frame mlem");
 }
 
-void LakeEvent(void *data, Event *event)
+void lake_event(void *data, Event *event)
 {
     (void)data;
     (void)event;
 }
 
-void LakeClean(void *data)
+void lake_clean(void *data)
 {
     (void)data;
 
-    LogVerbose("clean mlem");
+    log_verbose("clean mlem");
 }

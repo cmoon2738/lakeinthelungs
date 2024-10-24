@@ -3,20 +3,20 @@
 
 bool HadalHeadless_connect(void)
 {
-    LogVerbose("HADAL: running headless...");
+    log_verbose("HADAL: running headless...");
 
     const HadalAPI headless = {
         .id = HADAL_BACKEND_HEADLESS,
         .init = HadalHeadless_init,
         .terminate = HadalHeadless_terminate,
-#ifdef LAKE_NATIVE_VULKAN
+#ifdef AMW_NATIVE_VULKAN
         .vkPhysicalDevicePresentationSupport = HadalHeadless_vkPhysicalDevicePresentationSupport,
         .vkCreateSurface = HadalHeadless_vkCreateSurface,
 #endif
     };
 
-    if (!_HadalDebugVerifyAPI(&headless)) {
-        LogDebug("Internal API for headless mode is incomplete");
+    if (!_hadal_debug_verify_api(&headless)) {
+        log_debug("Internal API for headless mode is incomplete");
     }
 
     HADAL.api = headless;
@@ -26,7 +26,7 @@ bool HadalHeadless_connect(void)
 
 i32 HadalHeadless_init(void)
 {
-    return LAKE_SUCCESS;
+    return AMW_SUCCESS;
 }
 
 void HadalHeadless_terminate(void)

@@ -15,21 +15,21 @@ typedef enum {
     HADAL_BACKEND_HEADLESS,
 } HadalBackendID;
 
-extern u32  HadalCurrentBackendID(void);
-extern bool HadalBackendIsSupported(u32 backend_id);
+extern u32  hadal_current_backend_id(void);
+extern bool hadal_backend_is_supported(u32 backend_id);
 
 /** Initializing Hadal is required for all functions related to 
  *  windowing, input and the display backend. The shared state 
  *  is an internal global variable. */
-extern i32  HadalInit(u32 backend_id);
-extern void HadalTerminate(void);
+extern i32  hadal_init(u32 backend_id);
+extern void hadal_terminate(void);
 
 /** Opaque window handle. */
 typedef struct Window Window;
 
-extern Window *HadalCreateWindow(u32 width, u32 height, const char *title, Window *share);
-extern void    HadalDestroyWindow(Window *window);
-extern u32     HadalGetFlags(Window *window);
+extern Window *hadal_create_window(u32 width, u32 height, const char *title, Window *share);
+extern void    hadal_destroy_window(Window *window);
+extern u32     hadal_get_flags(Window *window);
 
 /** Opaque output monitor handle. */
 typedef struct Output Output;

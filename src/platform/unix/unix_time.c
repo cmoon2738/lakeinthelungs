@@ -10,14 +10,14 @@
     #include <time.h>
 #endif
 
-#ifdef LAKE_PLATFORM_APPLE
+#ifdef AMW_PLATFORM_APPLE
     #include <mach/mach_time.h>
 #endif
 
 static bool checked_monotonic = false;
 static bool has_monotonic = false;
 
-#if !defined(HAVE_CLOCK_GETTIME) && defined(LAKE_PLATFORM_APPLE)
+#if !defined(HAVE_CLOCK_GETTIME) && defined(AMW_PLATFORM_APPLE)
 static mach_timebase_info_data_t mach_base_info;
 #endif
 
@@ -28,7 +28,7 @@ static void check_monotonic(void)
     if (clock_gettime(CLOCK_MONOTONIC, &value) == 0) {
         has_monotonic = true;
     }
-#elif defined(LAKE_PLATFORM_APPLE)
+#elif defined(AMW_PLATFORM_APPLE)
     if (mach_timebase_info(&mach_base_info) == 0) {
         has_monotonic = true;
     }
@@ -36,7 +36,7 @@ static void check_monotonic(void)
     checked_monotonic = true;
 }
 
-u64 SysTimerCounter(void)
+u64 sys_timer_counter(void)
 {
     u64 ticks;
 
@@ -51,10 +51,10 @@ u64 SysTimerCounter(void)
         ticks = now.tv_sec;
         ticks *= NS_PER_SECOND;
         ticks += now.tv_nsec;
-#elif defined(LAKE_PLATFORM_APPLE)
+#elif defined(AMW_PLATFORM_APPLE)
         ticks = mach_absolute_time();
 #else
-        Assert(false);
+        assert_debug(false);
         ticks = 0;
 #endif
     } else {
@@ -68,7 +68,7 @@ u64 SysTimerCounter(void)
     return ticks;
 }
 
-u64 SysTimerFrequency(void)
+u64 sys_timer_frequency(void)
 {
     if (!checked_monotonic)
         check_monotonic();

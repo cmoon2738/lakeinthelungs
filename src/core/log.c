@@ -68,15 +68,15 @@ static void initialize_logger(void)
 static void terminate_logger(void)
 {
     if (logger.initialized) {
-        MutexDestroy(logger.lock);
-        Zero(logger);
+        mutex_destroy(logger.lock);
+        zero(logger);
     }
 }
 */
 
 static void process_message(LogMessage *log)
 {
-    //MutexLock(logger.lock);
+    //mutex_lock(logger.lock);
     if (!logger.quiet && (log->level >= logger.level)) {
         if (!log->time) {
             time_t t = time(NULL);
@@ -85,17 +85,17 @@ static void process_message(LogMessage *log)
         log->output = stderr;
         default_callback(log);
     }
-    //MutexUnlock(logger.lock);
+    //mutex_unlock(logger.lock);
 }
 
-void LogRaw(char *fmt, ...)
+void log_function_raw(char *fmt, ...)
 {
     if (logger.quiet)
         return;
     if (!logger.initialized)
         initialize_logger();
 
-    AssertRelease(fmt != NULL);
+    assert_debug(fmt != NULL);
 
     va_list ap;
     va_start(ap, fmt);
@@ -103,14 +103,14 @@ void LogRaw(char *fmt, ...)
     va_end(ap);
 }
 
-void LogFunction(i32 level, const char *file, i32 line, const char *fmt, ...)
+void log_function(i32 level, const char *file, i32 line, const char *fmt, ...)
 {
     if (logger.quiet)
         return;
     if (!logger.initialized)
         initialize_logger();
 
-    AssertRelease(fmt != NULL);
+    assert_debug(fmt != NULL);
 
     LogMessage log = {
         .fmt = fmt,
@@ -124,23 +124,23 @@ void LogFunction(i32 level, const char *file, i32 line, const char *fmt, ...)
     va_end(log.ap);
 }
 
-i32 LogGetLevel(void)
+i32 log_get_level(void)
 {
     return logger.level;
 }
 
-void LogSetLevel(i32 level)
+void log_set_level(i32 level)
 {
-    Assert(level <= LOG_FATAL && level >= 0);
+    assert_debug(level <= LOG_FATAL && level >= 0);
     logger.level = level;
 }
 
-bool LogIsQuiet(void)
+bool log_is_quiet(void)
 {
     return logger.quiet;
 }
 
-void LogSetQuiet(bool quiet)
+void log_set_quiet(bool quiet)
 {
     logger.quiet = quiet;
 }

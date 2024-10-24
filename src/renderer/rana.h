@@ -14,18 +14,18 @@ typedef enum {
     RANA_FLAG_FRAMEBUFFER_RESIZED   = 0x1,
 } RanaFlags;
 
-extern u32  RanaCurrentBackendID(void);
-extern bool RanaBackendIsSupported(u32 backend_id);
+extern u32  rana_current_backend_id(void);
+extern bool rana_backend_is_supported(u32 backend_id);
 
-extern i32  RanaInit(u32 backend_id);
-extern void RanaTerminate(void);
+extern i32  rana_init(u32 backend_id);
+extern void rana_terminate(void);
 
 /** Opaque handle for the rendering context. */
 typedef struct RanaContext RanaContext;
 
-extern RanaContext *RanaCreateContext(Window *window);
-extern void         RanaDestroyContext(RanaContext *rana);
-extern u32          RanaGetFlags(RanaContext *rana);
+extern RanaContext *rana_create_context(Window *window);
+extern void         rana_destroy_context(RanaContext *rana);
+extern u32          rana_get_flags(RanaContext *rana);
 
 
 #endif /* _LAKE_rana_h_ */

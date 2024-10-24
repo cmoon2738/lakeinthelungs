@@ -29,35 +29,35 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_callback(VkDebugUtilsMessageSe
 	switch (msg_severity) {
 #if LOG_USE_COLOR
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-        LogDebug("\033[38;5;215m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
+        log_debug("\033[38;5;215m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
 		break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-        LogVerbose("\033[38;5;180m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
+        log_verbose("\033[38;5;180m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
 		break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-        LogWarn("\033[38;5;167m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
+        log_warn("\033[38;5;167m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
 		break;
 	default:
-        LogError("\033[38;5;160m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
+        log_error("\033[38;5;160m%s \x1b[0m%s", callback_data->pMessage, msg_to_string(msg_type));
 #else
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-        LogDebug("%s %s", callback_data->pMessage, msg_to_string(msg_type));
+        log_debug("%s %s", callback_data->pMessage, msg_to_string(msg_type));
 		break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-        LogVerbose("%s %s", callback_data->pMessage, msg_to_string(msg_type));
+        log_verbose("%s %s", callback_data->pMessage, msg_to_string(msg_type));
 		break;
 	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-        LogWarn("%s %s", callback_data->pMessage, msg_to_string(msg_type));
+        log_warn("%s %s", callback_data->pMessage, msg_to_string(msg_type));
 		break;
 	default:
-        LogError("%s %s", callback_data->pMessage, msg_to_string(msg_type));
+        log_error("%s %s", callback_data->pMessage, msg_to_string(msg_type));
 #endif /* LOG_USE_COLOR */
-		Assert(!"vulkan validation error");
+		assert_debug(!"vulkan validation error");
 	}
 	return VK_FALSE;
 }
 
-void VulkanCreateValidationLayers(VkInstance instance)
+void vulkan_create_validation_layers(VkInstance instance)
 {
     if (validation_messenger == VK_NULL_HANDLE) {
         VkDebugUtilsMessengerCreateInfoEXT callback_info = {
@@ -75,20 +75,20 @@ void VulkanCreateValidationLayers(VkInstance instance)
             .pUserData = NULL
         };
         RANA_VK_VERIFY(vkCreateDebugUtilsMessengerEXT(instance, &callback_info, NULL, &validation_messenger));
-        LogDebug("Vulkan validation layers enabled");
+        log_debug("Vulkan validation layers created");
     }
 }
 
-void VulkanDestroyValidationLayers(VkInstance instance)
+void vulkan_destroy_validation_layers(VkInstance instance)
 {
     if (validation_messenger != VK_NULL_HANDLE) {
         vkDestroyDebugUtilsMessengerEXT(instance, validation_messenger, NULL);
         validation_messenger = VK_NULL_HANDLE;
-        LogDebug("Vulkan validation layers destroyed");
+        log_debug("Vulkan validation layers destroyed");
     }
 }
 
-const char *VulkanResult(VkResult code)
+const char *vulkan_result(VkResult code)
 {
 #define ERRSTR(r) case VK_ ##r: return "VK_"#r
 	switch (code) {
