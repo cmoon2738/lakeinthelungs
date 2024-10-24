@@ -11,5 +11,5 @@ sources += files(
     'vk_surface.c',
     'vk_validation.c',
 )
-defs += '-DLAKE_NATIVE_VULKAN=1'
+defs += '-DAMW_NATIVE_VULKAN=1'
 enabled_render_backends += 'vulkan'

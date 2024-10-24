@@ -46,7 +46,7 @@ bool VulkanPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_fami
     return HADAL.api.vkPhysicalDevicePresentationSupport(pd, queue_family);
 }
 
-VkResult VulkanCreateSurface(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+VkResult VulkanCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
 {
     Assert(surface != NULL);
     *surface = VK_NULL_HANDLE;
@@ -72,7 +72,7 @@ bool HadalWayland_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 q
         vkGetPhysicalDeviceWaylandPresentationSupportKHR(pd, queue_family, HADAL.wl.display) : false;
 }
 
-VkResult HadalWayland_vkCreateSurface(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+VkResult HadalWayland_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
 {
     VkResult out;
     VkWaylandSurfaceCreateInfoKHR wlsc_info;
@@ -102,7 +102,7 @@ bool HadalHeadless_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 
     return false;
 }
 
-VkResult HadalHeadless_vkCreateSurface(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+VkResult HadalHeadless_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
 {
     (void)instance;
     (void)window;

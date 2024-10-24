@@ -1,5 +1,5 @@
-#ifndef _LAKE_vk_h_
-#define _LAKE_vk_h_
+#ifndef _AMW_vk_h_
+#define _AMW_vk_h_
 
 #include "../common.h"
 #include "rana.h"
@@ -70,20 +70,28 @@ extern const char *VulkanResult(VkResult code);
 #endif /* LAKE_DEBUG */
 
 typedef enum {
-    RANA_VK_EXT_BIT__VK_LAYER_KHRONOS_validation        = 0x1,
-    RANA_VK_EXT_BIT__VK_KHR_surface                     = 0x2,
-    RANA_VK_EXT_BIT__VK_KHR_swapchain                   = 0x4,
-    RANA_VK_EXT_BIT__VK_KHR_dynamic_rendering           = 0x8,
-    RANA_VK_EXT_BIT__VK_EXT_debug_utils                 = 0x10,
-    RANA_VK_EXT_BIT__VK_KHR_shader_non_semantic_info    = 0x20,
+    /* instance */
+    RANA_VK_EXT_SURFACE_BIT                  = 0x00000001, /**< VK_KHR_surface */
+
+    /* device */
+    RANA_VK_EXT_SWAPCHAIN_BIT                = 0x00000002, /**< VK_KHR_swapchain */
+    RANA_VK_EXT_DYNAMIC_RENDERING_BIT        = 0x00000004, /**< VK_KHR_dynamic_rendering */
+    RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT     = 0x00000008, /**< VK_KHR_ray_tracing_pipeline */
+
+    /* layers */
+    RANA_VK_EXT_DEBUG_UTILS_BIT              = 0x10000000, /**< VK_EXT_debug_utils */
+    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT = 0x20000000, /**< VK_KHR_shader_non_semantic_info */
+    RANA_VK_EXT_VALIDATION_LAYERS_BIT        = 0x40000000, /**< VK_LAYER_KHRONOS_validation */
 } VulkanExtensions;
 
-extern void     CreateValidationLayers(VkInstance instance);
-extern void     DestroyValidationLayers(VkInstance instance);
+/* vk_validation.c */
+extern void     VulkanCreateValidationLayers(VkInstance instance);
+extern void     VulkanDestroyValidationLayers(VkInstance instance);
 
-extern char    *VulkanGetSurfaceExtension(void);
+/* vk_surface.c */
+extern char    *VulkanGetSurfaceExtension(void); /* from Hadal's backend */
 extern bool     VulkanPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family);
-extern VkResult VulkanCreateSurface(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
+extern VkResult VulkanCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 
 /* Per context Vulkan state */
 typedef struct RanaVulkanContext {
@@ -91,19 +99,19 @@ typedef struct RanaVulkanContext {
 } RanaVulkanContext;
 
 /* Renderer global Vulkan state: RANA.vk */
-typedef struct RanaVulkan {
+typedef struct RanaVulkanRenderer {
+    void   *module; /* drivers loaded at runtime */
     u32     ext_available;
     u32     ext_enabled;
-    void   *module;
 
     VkInstance              instance;
     VkPhysicalDevice        physical_device;
     VkDevice                device;
-} RanaVulkan;
+} RanaVulkanRenderer;
 
 /* Rana backend API */
-i32  RanaVulkan_init(void);
-void RanaVulkan_terminate(void);
+extern i32  RanaVulkan_init(void);
+extern void RanaVulkan_terminate(void);
 
 /* up to date with version 1.3.294 */
 #if defined(VK_VERSION_1_0)
@@ -1155,4 +1163,4 @@ extern PFN_vkGetPhysicalDevicePresentRectanglesKHR vkGetPhysicalDevicePresentRec
 extern PFN_vkAcquireNextImage2KHR vkAcquireNextImage2KHR;
 #endif /* (defined(VK_KHR_device_group) && defined(VK_KHR_swapchain)) || (defined(VK_KHR_swapchain) && defined(VK_VERSION_1_1)) */
 
-#endif /* _LAKE_vk_h_ */
+#endif /* _AMW_vk_h_ */

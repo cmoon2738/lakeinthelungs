@@ -2,7 +2,7 @@ if sys == 'android'
     #sources += files('')
 
     defs += [
-        '-DLAKE_PLATFORM_ANDROID=1',
+        '-DAMW_PLATFORM_ANDROID=1',
         '-DVK_USE_PLATFORM_ANDROID_KHR' ]
     cross += [ '-u', 'ANativeActivity_onCreate' ]
     android_ndk = '/opt/android-ndk'

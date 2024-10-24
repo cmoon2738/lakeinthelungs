@@ -3,7 +3,7 @@ if sys == 'windows'
     #sources = files('')
 
     defs += [
-        '-DLAKE_PLATFORM_WINDOWS',
+        '-DAMW_PLATFORM_WINDOWS',
         '-DVK_USE_PLATFORM_WIN32_KHR' ]
     deps += dep_threads
     deps += cc.find_library('ole32', required: true)

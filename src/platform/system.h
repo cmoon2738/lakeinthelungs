@@ -1,5 +1,5 @@
-#ifndef _LAKE_system_h_
-#define _LAKE_system_h_
+#ifndef _AMW_system_h_
+#define _AMW_system_h_
 
 #include "../common.h"
 
@@ -31,4 +31,4 @@ extern u64 SysTimerFrequency(void);
 /** Reads information about the cpu, saves them to the arguments. */
 extern void SysCpuCount(i32 *threads, i32 *cores, i32 *packages);
 
-#endif /* _LAKE_system_h_ */
+#endif /* _AMW_system_h_ */

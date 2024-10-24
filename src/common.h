@@ -1,5 +1,5 @@
-#ifndef _LAKE_common_h_
-#define _LAKE_common_h_
+#ifndef _AMW_common_h_
+#define _AMW_common_h_
 
 #include <stdint.h>
 #include <stddef.h>
@@ -8,79 +8,79 @@
 #include <limits.h>
 #include <string.h>
 
-#define LAKE_VERSION_MAJOR 0
-#define LAKE_VERSION_MINOR 1
-#define LAKE_VERSION_REVISION 1
+#define AMW_VERSION_MAJOR 0
+#define AMW_VERSION_MINOR 1
+#define AMW_VERSION_REVISION 1
 
 #define VERSION_NUM(major, minor, revision) \
     ((major) * 1000000 + (minor) * 1000 + (revision))
 
-#define LAKE_VERSION VERSION_NUM(LAKE_VERSION_MAJOR, LAKE_VERSION_MINOR, LAKE_VERSION_REVISION)
+#define AMW_VERSION VERSION_NUM(AMW_VERSION_MAJOR, AMW_VERSION_MINOR, AMW_VERSION_REVISION)
 
 #define VERSION_MAJOR(version) ((version) / 1000000)
 #define VERSION_MINOR(version) (((version) / 1000) % 1000)
 #define VERSION_REVISION(version) ((version) % 1000)
 
-#if !defined(LAKE_NDEBUG) && !defined(LAKE_DEBUG)
-    #define LAKE_NDEBUG 1
+#if !defined(AMW_NDEBUG) && !defined(AMW_DEBUG)
+    #define AMW_NDEBUG 1
 #endif
 
-#ifndef LAKE_PLATFORM_WINDOWS
+#ifndef AMW_PLATFORM_WINDOWS
     #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
-        #define LAKE_PLATFORM_WINDOWS 1
+        #define AMW_PLATFORM_WINDOWS 1
         #ifndef VK_USE_PLATFORM_WIN32_KHR
             #define VK_USE_PLATFORM_WIN32_KHR
         #endif
     #endif
 #endif
-#ifndef LAKE_PLATFORM_UNIX
+#ifndef AMW_PLATFORM_UNIX
     #if defined(__unix__) || defined(__unix) || defined(unix)
-        #define LAKE_PLATFORM_UNIX 1
+        #define AMW_PLATFORM_UNIX 1
     #endif
 #endif
-#ifndef LAKE_PLATFORM_APPLE
+#ifndef AMW_PLATFORM_APPLE
     #if defined(__APPLE__)
-        #define LAKE_PLATFORM_APPLE 1
+        #define AMW_PLATFORM_APPLE 1
         #ifndef VK_USE_PLATFORM_METAL_EXT
             #define VK_USE_PLATFORM_METAL_EXT    /* both Mac & iOS */
         #endif
         #include <TargetConditionals.h>
         #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-            #ifndef LAKE_PLATFORM_IOS
-                #define LAKE_PLATFORM_IOS 1
+            #ifndef AMW_PLATFORM_IOS
+                #define AMW_PLATFORM_IOS 1
             #endif
         #else
-            #define LAKE_PLATFORM_MACOSX 1
+            #define AMW_PLATFORM_MACOSX 1
         #endif
     #endif
 #endif
-#ifndef LAKE_PLATFORM_ANDROID
+#ifndef AMW_PLATFORM_ANDROID
     #if defined(__ANDROID__)
-        #define LAKE_PLATFORM_ANDROID 1
+        #define AMW_PLATFORM_ANDROID 1
         #ifndef VK_USE_PLATFORM_ANDROID_KHR
             #define VK_USE_PLATFORM_ANDROID_KHR
         #endif
     #endif
 #endif
-#ifndef LAKE_PLATFORM_EMSCRIPTEN
+#ifndef AMW_PLATFORM_EMSCRIPTEN
     #if defined(__EMSCRIPTEN__)
-        #define LAKE_PLATFORM_EMSCRIPTEN 1
+        #define AMW_PLATFORM_EMSCRIPTEN 1
     #endif
 #endif 
-#ifndef LAKE_PLATFORM_LINUX
+#ifndef AMW_PLATFORM_LINUX
     #if defined(__linux__) || defined(__gnu_linux__) || defined(__FreeBSD__) || defined(__OpenBSD__)
-        #define LAKE_PLATFORM_LINUX 1
-        #if defined(LAKE_NATIVE_WAYLAND)
+        #define AMW_PLATFORM_LINUX 1
+        #if defined(AMW_NATIVE_WAYLAND)
             #ifndef VK_USE_PLATFORM_WAYLAND_KHR
                 #define VK_USE_PLATFORM_WAYLAND_KHR
             #endif
         #endif
-        #if defined(LAKE_NATIVE_XCB)
+        #if defined(AMW_NATIVE_XCB)
             #ifndef VK_USE_PLATFORM_XCB_KHR
                 #define VK_USE_PLATFORM_XCB_KHR
             #endif
         #endif
-        #if defined(LAKE_NATIVE_KMS)
+        #if defined(AMW_NATIVE_KMS)
             #ifndef VK_USE_PLATFORM_KMS_KHR
                 #define VK_USE_PLATFORM_KMS_KHR
             #endif
@@ -1198,26 +1198,26 @@
         ((type*)ASSUME_ALIGNED((expr), __alignof__(type)))
 #endif
 
-#define Zero(x)  memset(&(x), 0, sizeof((x)))
-#define Zerop(x) memset((x), 0, sizeof(*(x)))
-#define Zeroa(x) memset((x), 0, sizeof(x))
+#define zero(x)  memset(&(x), 0, sizeof((x)))
+#define zerop(x) memset((x), 0, sizeof(*(x)))
+#define zeroa(x) memset((x), 0, sizeof(x))
 
-#define ArraySize(array) (sizeof(array)/sizeof(array[0]))
-#define Clamp(x,a,b)     (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)))
-#define ClampZO(x)       (Clamp(x, 0, 1))
-#define Min(x,y)         (((x) < (y)) ? (x) : (y))
-#define Max(x,y)         (((x) > (y)) ? (x) : (y))
-#define Swap(type,a,b)   { type temp = a; a = b; b = temp; }
+#define array_size(array) (sizeof(array)/sizeof(array[0]))
+#define clamp(x,a,b)     (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)))
+#define clamp_zo()       (clamp(x, 0, 1))
+#define min(x,y)         (((x) < (y)) ? (x) : (y))
+#define max(x,y)         (((x) > (y)) ? (x) : (y))
+#define swap(type,a,b)   { type temp = a; a = b; b = temp; }
 
-#define ReadFlags(flags,mask)   ((flags) & (mask))   /* check for flags */
-#define SetFlags(flags,mask)    ((flags) |= (mask))  /* set the specified flags to 1 */
-#define UnsetFlags(flags,mask)  ((flags) &= ~(mask)) /* set the specified flags to 0 */
-#define ToggleFlags(flags,mask) ((flags) ^= (mask))  /* toggle the specified flags */
+#define read_flags(flags,mask)   ((flags) & (mask))   /* check for flags */
+#define set_flags(flags,mask)    ((flags) |= (mask))  /* set the specified flags to 1 */
+#define unset_flags(flags,mask)  ((flags) &= ~(mask)) /* set the specified flags to 0 */
+#define toggle_flags(flags,mask) ((flags) ^= (mask))  /* toggle the specified flags */
 
-#define ReadBit(flags,bit)     (flags & (1 << bit))   /* check for bit */
-#define SetBit(flags,bit)      (flags |= (1 << bit))  /* set the specified bits to 1 */
-#define UnsetBit(flags,bit)    (flags &= ~(1 << bit)) /* set the specified bits to 0 */
-#define ToggleBit(flags,bit)   (flags ^= (1 << bit))  /* toggle the specified bits */
+#define read_bit(flags,bit)     (flags & (1 << bit))   /* check for bit */
+#define set_bit(flags,bit)      (flags |= (1 << bit))  /* set the specified bits to 1 */
+#define unset_bit(flags,bit)    (flags &= ~(1 << bit)) /* set the specified bits to 0 */
+#define toggle_bit(flags,bit)   (flags ^= (1 << bit))  /* toggle the specified bits */
 
 #ifndef false
     #define false 0
@@ -1330,31 +1330,31 @@ typedef enum {
     LOG_FATAL,
 } LogLevel;
 
-extern void LogFunctionRaw(char *fmt, ...) PRINTF_FORMAT(1);
-extern void LogFunction(i32 level, const char *file, i32 line, const char *fmt, ...) PRINTF_FORMAT(4);
+extern void log_function_raw(char *fmt, ...) PRINTF_FORMAT(1);
+extern void log_function(i32 level, const char *file, i32 line, const char *fmt, ...) PRINTF_FORMAT(4);
 
 #ifndef LOG_DISABLE_OUTPUT
-#define LogRaw(...)     LogFunctionRaw(__VA_ARGS__)
-#define LogVerbose(...) LogFunction(LOG_VERBOSE, LOG_FILE, LOG_LINE, __VA_ARGS__)
-#define LogDebug(...)   LogFunction(LOG_DEBUG,   LOG_FILE, LOG_LINE, __VA_ARGS__)
-#define LogInfo(...)    LogFunction(LOG_INFO,    LOG_FILE, LOG_LINE, __VA_ARGS__)
-#define LogWarn(...)    LogFunction(LOG_WARN,    LOG_FILE, LOG_LINE, __VA_ARGS__)
-#define LogError(...)   LogFunction(LOG_ERROR,   LOG_FILE, LOG_LINE, __VA_ARGS__)
-#define LogFatal(...)   LogFunction(LOG_FATAL,   LOG_FILE, LOG_LINE, __VA_ARGS__)
+#define log_raw(...)     log_function_raw(__VA_ARGS__)
+#define log_verbose(...) log_function(LOG_VERBOSE, LOG_FILE, LOG_LINE, __VA_ARGS__)
+#define log_debug(...)   log_function(LOG_DEBUG,   LOG_FILE, LOG_LINE, __VA_ARGS__)
+#define log_info(...)    log_function(LOG_INFO,    LOG_FILE, LOG_LINE, __VA_ARGS__)
+#define log_warn(...)    log_function(LOG_WARN,    LOG_FILE, LOG_LINE, __VA_ARGS__)
+#define log_error(...)   log_function(LOG_ERROR,   LOG_FILE, LOG_LINE, __VA_ARGS__)
+#define log_fatal(...)   log_function(LOG_FATAL,   LOG_FILE, LOG_LINE, __VA_ARGS__)
 #else
-#define LogRaw(...)
-#define LogVerbose(...) 
-#define LogDebug(...) 
-#define LogInfo(...)  
-#define LogWarn(...)  
-#define LogError(...) 
-#define LogFatal(...) 
+#define log_raw(...)
+#define log_verbose(...) 
+#define log_debug(...) 
+#define log_info(...)  
+#define log_warn(...)  
+#define log_error(...) 
+#define log_fatal(...) 
 #endif
 
-extern i32  LogGetLevel(void);
-extern void LogSetLevel(i32 level);
-extern bool LogIsQuiet(void);
-extern void LogSetQuiet(bool quiet);
+extern i32  log_get_level(void);
+extern void log_set_level(i32 level);
+extern bool log_is_quiet(void);
+extern void log_set_quiet(bool quiet);
 
 #define MS_PER_SECOND       1000
 #define US_PER_SECOND       1000000
@@ -1369,79 +1369,79 @@ extern void LogSetQuiet(bool quiet);
 #define NS_TO_US(NS)        ((NS) / NS_PER_US)
 
 /** A global timer that counts from the moment it's initialized. */
-extern void TicksInit(void);
-extern void TicksQuit(void);
+extern void ticks_init(void);
+extern void ticks_quit(void);
 
 /** Get the time passed since initializing the 'ticks' timer, in ms or ns. */
-extern u64  TicksMS(void);
-extern u64  TicksNS(void);
+extern u64  ticks_ms(void);
+extern u64  ticks_ns(void);
 
 #if HAS_BUILTIN(__builtin_debugtrap)
-    #define DebugTrap() __builtin_debugtrap()
+    #define debugtrap() __builtin_debugtrap()
 #elif HAS_BUILTIN(__debugbreak)
-    #define DebugTrap() __debugbreak()
+    #define debugtrap() __debugbreak()
 #endif
 #if !defined(DebugTrap)
     #if defined(CC_MSVC_VERSION) || defined(CC_INTEL_VERSION)
-        #define DebugTrap() __debugbreak()
+        #define debugtrap() __debugbreak()
     #elif defined(CC_ARM_VERSION)
-        #define DebugTrap() __breakpoint(42)
+        #define debugtrap() __breakpoint(42)
     #elif defined(CC_IBM_VERSION)
         #include <builtins.h>
-        #define DebugTrap() __trap(42)
+        #define debugtrap() __trap(42)
     #elif ARCH_X86_CHECK(7) /* _M_IX86 */
-        static inline void DebugTrap(void) { __asm int 3h; }
+        static inline void debugtrap(void) { __asm int 3h; }
     #elif defined(ARCH_X86) || defined(ARCH_AMD64)
-        static inline void DebugTrap(void) { __asm__ __volatile__("int $03"); }
+        static inline void debugtrap(void) { __asm__ __volatile__("int $03"); }
     #elif defined(__thumb__) /* arm32 */
-        static inline void DebugTrap(void) { __asm__ __volatile__(".inst 0xde01"); }
+        static inline void debugtrap(void) { __asm__ __volatile__(".inst 0xde01"); }
     #elif defined(ARCH_AARCH64)
-        static inline void DebugTrap(void) { __asm__ __volatile__(".inst 0xd4200000"); }
+        static inline void debugtrap(void) { __asm__ __volatile__(".inst 0xd4200000"); }
     #elif defined(ARCH_ARM)
-        static inline void DebugTrap(void) { __asm__ __volatile__(".inst 0xe7f001f0"); }
+        static inline void debugtrap(void) { __asm__ __volatile__(".inst 0xe7f001f0"); }
     #elif defined(ARCH_ALPHA) && !defined(__osf__)
-        static inline void DebugTrap(void) { __asm__ __volatile__("bpt"); }
+        static inline void debugtrap(void) { __asm__ __volatile__("bpt"); }
     #elif defined(_54_)
-        static inline void DebugTrap(void) { __asm__ __volatile__("ESTOP"); }
+        static inline void debugtrap(void) { __asm__ __volatile__("ESTOP"); }
     #elif defined(_55_)
-        static inline void DebugTrap(void) { __asm__ __volatile__(";\n .if (.MNEMONIC)\n ESTOP_1\n .else\n ESTOP_1()\n .endif\n NOP"); }
+        static inline void debugtrap(void) { __asm__ __volatile__(";\n .if (.MNEMONIC)\n ESTOP_1\n .else\n ESTOP_1()\n .endif\n NOP"); }
     #elif defined(_64P_)
-        static inline void DebugTrap(void) { __asm__ __volatile__("SWBP 0"); }
+        static inline void debugtrap(void) { __asm__ __volatile__("SWBP 0"); }
     #elif defined(_6x_)
-        static inline void DebugTrap(void) { __asm__ __volatile__("NOP\n .word 0x10000000"); }
+        static inline void debugtrap(void) { __asm__ __volatile__("NOP\n .word 0x10000000"); }
     #elif defined(__STDC_HOSTED__) && (__STDC_HOSTED__ == 0) && defined(CC_GNUC_VERSION)
-        #define DebugTrap() __builtin_trap()
+        #define debugtrap() __builtin_trap()
     #else
         #include <signal.h>
         #if defined(SIGTRAP)
-            #define DebugTrap() raise(SIGTRAP)
+            #define debugtrap() raise(SIGTRAP)
         #else
-            #define DebugTrap() raise(SIGABRT)
+            #define debugtrap() raise(SIGABRT)
         #endif
     #endif
 #endif
 
 #if defined(__cplusplus)
     #if (__cplusplus >= 201103L)
-        #define StaticAssert(x,desc) static_assert(x, desc)
+        #define static_assertion(x,desc) static_assert(x,desc)
     #endif
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 202311L)
-    #define StaticAssert(x,desc) static_assert(x, desc)
+    #define static_assertion(x,desc) static_assert(x,desc)
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-    #define StaticAssert(x,desc) _Static_assert(x, desc)
+    #define static_assertion(x,desc) _Static_assert(x,desc)
 /* GCC 4.6 or later */
 #elif CC_GNUC_VERSION_CHECK(4,6,0)
     /* It will work but it may throw a warning:
      * warning: ISO C99 does not support '_Static_assert' [-Wpedantic] */
-    #define StaticAssert(x,desc) _Static_assert(x, desc)
+    #define static_assertion(x,desc) _Static_assert(x,desc)
 #endif
-#ifndef StaticAssert
-    #define StaticAssert(x,desc)
+#ifndef static_assertion
+    #define static_assertion(x,desc)
 #endif
 #ifndef ASSERT_LEVEL
     #ifdef DEFAULT_ASSERT_LEVEL
         #define ASSERT_LEVEL DEFAULT_ASSERT_LEVEL
-    #elif defined(LAKE_DEBUG) || defined(_DEBUG) || defined(DEBUG) || (defined(CC_GNUC_VERSION) && (!defined(__OPTIMIZE__)) || !defined(LAKE_NDEBUG))
+    #elif defined(AMW_DEBUG) || defined(_DEBUG) || defined(DEBUG) || (defined(CC_GNUC_VERSION) && (!defined(__OPTIMIZE__)) || !defined(AMW_NDEBUG))
         #define ASSERT_LEVEL 2
     #else
         #define ASSERT_LEVEL 1
@@ -1449,33 +1449,33 @@ extern u64  TicksNS(void);
 #endif
 
 #define DISABLED_ASSERT(condition)
-#define ENABLED_ASSERT(condition)                           \
-    do {                                                    \
-        if (! (condition)) {                                \
-            LogFatal("Assertion '%s' failed.", #condition); \
-            DebugTrap();                                    \
-        }                                                   \
+#define ENABLED_ASSERT(condition)                            \
+    do {                                                     \
+        if (! (condition)) {                                 \
+            log_fatal("Assertion '%s' failed.", #condition); \
+            debugtrap();                                     \
+        }                                                    \
     } while (false)
 
 /* This assertion is never disabled at any level. */
-#define AssertAlways(condition) ENABLED_ASSERT(condition)
+#define assertion_always(condition) ENABLED_ASSERT(condition)
 
 #if ASSERT_LEVEL == 0   /* assertions disabled */
-    #define Assert(condition)         DISABLED_ASSERT(condition)
-    #define AssertRelease(condition)  DISABLED_ASSERT(condition)
-    #define AssertParanoid(condition) DISABLED_ASSERT(condition)
+    #define assertion(condition)          DISABLED_ASSERT(condition)
+    #define assertion_release(condition)  DISABLED_ASSERT(condition)
+    #define assertion_paranoid(condition) DISABLED_ASSERT(condition)
 #elif ASSERT_LEVEL == 1  /* release settings. */
-    #define Assert(condition)         DISABLED_ASSERT(condition)
-    #define AssertRelease(condition)  ENABLED_ASSERT(condition)
-    #define AssertParanoid(condition) DISABLED_ASSERT(condition)
+    #define assertion(condition)          DISABLED_ASSERT(condition)
+    #define assertion_release(condition)  ENABLED_ASSERT(condition)
+    #define assertion_paranoid(condition) DISABLED_ASSERT(condition)
 #elif ASSERT_LEVEL == 2  /* normal settings. */
-    #define Assert(condition)         ENABLED_ASSERT(condition)
-    #define AssertRelease(condition)  ENABLED_ASSERT(condition)
-    #define AssertParanoid(condition) DISABLED_ASSERT(condition)
+    #define assertion(condition)          ENABLED_ASSERT(condition)
+    #define assertion_release(condition)  ENABLED_ASSERT(condition)
+    #define assertion_paranoid(condition) DISABLED_ASSERT(condition)
 #elif ASSERT_LEVEL == 3  /* paranoid settings. */
-    #define Assert(condition)         ENABLED_ASSERT(condition)
-    #define AssertRelease(condition)  ENABLED_ASSERT(condition)
-    #define AssertParanoid(condition) ENABLED_ASSERT(condition)
+    #define assertion(condition)          ENABLED_ASSERT(condition)
+    #define assertion_release(condition)  ENABLED_ASSERT(condition)
+    #define assertion_paranoid(condition) ENABLED_ASSERT(condition)
 #else
     #error Unknown assertion level. Use: 0-disabled, 1-release, 2-debug, 3-paranoid.
 #endif
@@ -1522,7 +1522,7 @@ extern u64  TicksNS(void);
     #elif defined(__MAVERICK__)
         /* For Maverick, float words are always little-endian. */
         #define FLOATWORDORDER BYTEORDER_LIL_ENDIAN
-    #elif (defined(__arm__) || defined(__thumb__)) && !defined(__VFP_FP__) && !defined(__ARM_EABI__)
+    #elif (defined(ARCH_ARM) || defined(__thumb__)) && !defined(__VFP_FP__) && !defined(__ARM_EABI__)
         /* For FPA, float words are always big-endian. */
         #define FLOATWORDORDER BYTEORDER_BIG_ENDIAN
     #else
@@ -1547,61 +1547,61 @@ extern u64  TicksNS(void);
 
 /* Byte swap 16-bit integer. */
 #if HAS_BUILTIN_BSWAP16
-    #define Bswap16(x) __builtin_bswap16(x)
+    #define bswap16(x) __builtin_bswap16(x)
 #elif CC_MSVC_VERSION_CHECK(14,0,0)
     #pragma intrinsic(_byteswap_ushort)
-    #define Bswap16(x) _byteswap_ushort(x)
+    #define bswap16(x) _byteswap_ushort(x)
 #elif defined(ARCH_X86) && !HAS_BROKEN_BSWAP
-    INLINE u16 Bswap16(u16 x) {
+    INLINE u16 bswap16(u16 x) {
         __asm__("xchgb %b0,%h0": "=q"(x):"0"(x));
         return x;
     }
 #elif defined(ARCH_AMD64)
-    INLINE u16 Bswap16(u16 x) {
+    INLINE u16 bswap16(u16 x) {
         __asm__("xchgb %b0,%h0": "=Q"(x):"0"(x));
         return x;
     }
 #elif defined(ARCH_POWER)
-    INLINE u16 Bswap16(u16 x) {
+    INLINE u16 bswap16(u16 x) {
         i32 result;
         __asm__("rlwimi %0,%2,8,16,23": "=&r"(result):"0"(x >> 8), "r"(x));
         return (u16)result;
     }
 #elif (defined(ARCH_M68K) && !defined(__mcoldfire__))
-    INLINE u16 Bswap16(u16 x) {
+    INLINE u16 bswap16(u16 x) {
         __asm__("rorw #8,%0": "=d"(x): "0"(x):"cc");
         return x;
     }
 #elif defined(__WATCOMC__) && defined(__386__)
-    extern __inline u16 Bswap16(u16);
-    #pragma aux Bswap16 = \
+    extern __inline u16 bswap16(u16);
+    #pragma aux bswap16 = \
         "xchg al, ah" \
         parm   [ax]   \
         modify [ax];
 #else
-    INLINE u16 Bswap16(u16 x) {
+    INLINE u16 bswap16(u16 x) {
         return (u16)((x << 8) | (x >> 8));
     }
 #endif
 
 /* Byte swap 32-bit integer. */
 #if HAS_BUILTIN_BSWAP32
-    #define Bswap32(x) __builtin_bswap32(x)
+    #define bswap32(x) __builtin_bswap32(x)
 #elif CC_MSVC_VERSION_CHECK(14,0,0)
     #pragma intrinsic(_byteswap_ulong)
-    #define Bswap32(x) _byteswap_ulong(x)
+    #define bswap32(x) _byteswap_ulong(x)
 #elif defined(ARCH_X86) && !HAS_BROKEN_BSWAP
-    INLINE u32 Bswap32(u32 x) {
+    INLINE u32 bswap32(u32 x) {
         __asm__("bswap %0": "=r"(x):"0"(x));
         return x;
     }
 #elif defined(ARCH_AMD64)
-    INLINE u32 Bswap32(u32 x) {
+    INLINE u32 bswap32(u32 x) {
         __asm__("bswapl %0": "=r"(x):"0"(x));
         return x;
     }
 #elif defined(ARCH_POWER)
-    INLINE u32 Bswap32(u32 x) {
+    INLINE u32 bswap32(u32 x) {
         u32 result;
 
         __asm__("rlwimi %0,%2,24,16,23": "=&r"(result): "0" (x>>24),  "r"(x));
@@ -1610,30 +1610,30 @@ extern u64  TicksNS(void);
         return result;
     }
 #elif (defined(ARCH_M68K) && !defined(__mcoldfire__))
-    INLINE u32 Bswap32(u32 x) {
+    INLINE u32 bswap32(u32 x) {
         __asm__("rorw #8,%0\n\tswap %0\n\trorw #8,%0": "=d"(x): "0"(x):"cc");
         return x;
     }
 #elif defined(__WATCOMC__) && defined(__386__)
-    extern __inline u32 Bswap32(u32);
-    #pragma aux Bswap32 = \
+    extern __inline u32 bswap32(u32);
+    #pragma aux bswap32 = \
         "bswap eax"  \
         parm   [eax] \
         modify [eax];
 #else
-    INLINE u32 Bswap32(u32 x) {
+    INLINE u32 bswap32(u32 x) {
         return (u32)((x << 24) | ((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00) | (x >> 24));
     }
 #endif
 
 /* Byte swap 64-bit integer. */
 #if HAS_BUILTIN_BSWAP64
-    #define Bswap64(x) __builtin_bswap64(x)
+    #define bswap64(x) __builtin_bswap64(x)
 #elif CC_MSVC_VERSION_CHECK(14,0,0)
     #pragma intrinsic(_byteswap_uint64)
-    #define Bswap64(x) _byteswap_uint64(x)
+    #define bswap64(x) _byteswap_uint64(x)
 #elif defined(ARCH_X86) && !HAS_BROKEN_BSWAP
-    INLINE u64 Bswap64(u64 x) {
+    INLINE u64 bswap64(u64 x) {
         union {
             struct {
                 u32 a, b;
@@ -1647,40 +1647,40 @@ extern u64  TicksNS(void);
         return v.u;
     }
 #elif defined(ARCH_AMD64)
-    INLINE u64 Bswap64(u64 x) {
+    INLINE u64 bswap64(u64 x) {
         __asm__("bswapq %0": "=r"(x):"0"(x));
         return x;
     }
 #elif defined(__WATCOMC__) && defined(__386__)
-    extern __inline u64 Bswap64(u64);
-    #pragma aux Bswap64 = \
+    extern __inline u64 bswap64(u64);
+    #pragma aux bswap64 = \
         "bswap eax"     \
         "bswap edx"     \
         "xchg eax,edx"  \
         parm [eax edx]  \
         modify [eax edx];
 #else
-    INLINE u64 Bswap64(u64 x) {
+    INLINE u64 bswap64(u64 x) {
         u32 hi, lo;
 
         /* Separate into high and low 32-bit values and swap them */
         lo = (u32)(x & 0xFFFFFFFF);
         x >>= 32;
         hi = (u32)(x & 0xFFFFFFFF);
-        x = Bswap32(lo);
+        x = bswap32(lo);
         x <<= 32;
-        x |= Bswap32(hi);
+        x |= bswap32(hi);
         return (x);
     }
 #endif
 
-INLINE f32 Bswapf(f32 x) {
+INLINE f32 bswapf(f32 x) {
     union {
         f32 f;
         u32 u;
     } swapper;
     swapper.f = x;
-    swapper.u = Bswap32(swapper.u);
+    swapper.u = bswap32(swapper.u);
     return swapper.f;
 }
 
@@ -1691,28 +1691,28 @@ INLINE f32 Bswapf(f32 x) {
 #undef HAS_BUILTIN_BSWAP64
 
 #if BYTEORDER == BYTEORDER_LIL_ENDIAN
-    #define Bswap16LE(x) (x)
-    #define Bswap32LE(x) (x)
-    #define Bswap64LE(x) (x)
-    #define BswapfLE(x)  (x)
-    #define Bswap16BE(x) Bswap16(x)
-    #define Bswap32BE(x) Bswap32(x)
-    #define Bswap64BE(x) Bswap64(x)
-    #define Bswapf(x)    Bswapf(x)
+    #define bswap16LE(x) (x)
+    #define bswap32LE(x) (x)
+    #define bswap64LE(x) (x)
+    #define bswapfLE(x)  (x)
+    #define bswap16BE(x) bswap16(x)
+    #define bswap32BE(x) bswap32(x)
+    #define bswap64BE(x) bswap64(x)
+    #define bswapf(x)    bswapf(x)
 #else
-    #define Bswap16LE(x) Bswap16(x)
-    #define Bswap32LE(x) Bswap32(x)
-    #define Bswap64LE(x) Bswap64(x)
-    #define BswapfLE(x)  Bswapf(x)
-    #define Bswap16BE(x) (x)
-    #define Bswap32BE(x) (x)
-    #define Bswap64BE(x) (x)
-    #define BswapfBE(x)  (x)
+    #define bswap16LE(x) bswap16(x)
+    #define bswap32LE(x) bswap32(x)
+    #define bswap64LE(x) bswap64(x)
+    #define bswapfLE(x)  bswapf(x)
+    #define bswap16BE(x) (x)
+    #define bswap32BE(x) (x)
+    #define bswap64BE(x) (x)
+    #define bswapfBE(x)  (x)
 #endif       
 
 typedef enum {
-    LAKE_SUCCESS = 0,
-    LAKE_ERROR_STUB = -1, // FIXME update later all return code messages using this
-} LakeResult;
+    AMW_SUCCESS = 0,
+    AMW_ERROR_STUB = -1, // FIXME update later all return code messages using this
+} AMWResult;
 
 #endif /* _LAKE_common_h_ */

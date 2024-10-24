@@ -13,13 +13,13 @@ if sys == 'android' or sys == 'linux' or sys == 'bsd'
         #sources += files('')
 
         defs += [
-            '-DLAKE_NATIVE_KMS=1',
+            '-DAMW_NATIVE_KMS=1',
             '-DVK_USE_PLATFORM_KMS_KHR' ]
         deps += [ dep_udev, dep_drm, dep_gbm ]
         enabled_display_backends += [ 'kms' ]
     endif
 
-    defs += '-DLAKE_PLATFORM_LINUX=1'
+    defs += '-DAMW_PLATFORM_LINUX=1'
 endif
 
 if sys == 'linux' or sys == 'bsd'
@@ -38,7 +38,7 @@ if sys == 'linux' or sys == 'bsd'
         )
 
         defs += [ 
-            '-DLAKE_NATIVE_WAYLAND=1', 
+            '-DAMW_NATIVE_WAYLAND=1', 
             '-DVK_USE_PLATFORM_WAYLAND_KHR' ]
         deps += [ dep_wayland_client, dep_xkbcommon ]
 
@@ -96,7 +96,7 @@ if sys == 'linux' or sys == 'bsd'
         #sources += files('')
 
         defs += [ 
-            '-DLAKE_NATIVE_XCB=1', 
+            '-DAMW_NATIVE_XCB=1', 
             '-DVK_USE_PLATFORM_XCB_KHR' ]
         deps += [ dep_xcb, dep_xcb_icccm ]
         enabled_display_backends += [ 'xcb' ]

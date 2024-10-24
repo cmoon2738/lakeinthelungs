@@ -79,8 +79,8 @@ static void AMoonlitWalk(AppDescription *app_desc)
 
 NORETURN static void print_version(FILE *f) 
 {
-    fprintf(f, "Lake in the Lungs, A MoonlitWalk Engine ver. %d.%d.%d", 
-            LAKE_VERSION_MAJOR, LAKE_VERSION_MINOR, LAKE_VERSION_REVISION);
+    fprintf(f, "A MoonlitWalk Engine ver. %d.%d.%d", 
+            AMW_VERSION_MAJOR, AMW_VERSION_MINOR, AMW_VERSION_REVISION);
     SysExit(0);
 }
 
@@ -246,7 +246,7 @@ static AppDescription AppMain(i32 argc, char **argv)
         app_desc.clean = LakeClean;
         app_desc.data = NULL;
         app_desc.name = "Lake in the Lungs";
-        app_desc.version = LAKE_VERSION;
+        app_desc.version = AMW_VERSION;
         break;
     }
 

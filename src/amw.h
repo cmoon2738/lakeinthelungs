@@ -1,5 +1,5 @@
-#ifndef _LAKE_amw_h_
-#define _LAKE_amw_h_
+#ifndef _AMW_h_
+#define _AMW_h_
 
 #include "common.h"
 #include "core/events.h"
@@ -30,7 +30,7 @@ typedef struct AMWEngine {
     f64 delta_time;
 
     AppDescription *app;
-    HadalWindow    *window;
+    Window         *window;
     RanaContext    *rana;
 } AMWEngine;
 

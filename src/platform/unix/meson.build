@@ -3,5 +3,5 @@ if have_posix
         'unix_dll.c',
         'unix_time.c',
     )
-    defs += '-DLAKE_PLATFORM_UNIX=1'
+    defs += '-DAMW_PLATFORM_UNIX=1'
 endif

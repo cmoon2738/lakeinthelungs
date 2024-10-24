@@ -20,9 +20,10 @@ extern bool RanaBackendIsSupported(u32 backend_id);
 extern i32  RanaInit(u32 backend_id);
 extern void RanaTerminate(void);
 
+/** Opaque handle for the rendering context. */
 typedef struct RanaContext RanaContext;
 
-extern RanaContext *RanaCreateContext(HadalWindow *window);
+extern RanaContext *RanaCreateContext(Window *window);
 extern void         RanaDestroyContext(RanaContext *rana);
 extern u32          RanaGetFlags(RanaContext *rana);
 

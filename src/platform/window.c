@@ -1,6 +1,6 @@
 #include "hadopelagic.h"
 
-HadalWindow *HadalCreateWindow(u32 width, u32 height, const char *title, HadalWindow *share)
+Window *HadalCreateWindow(u32 width, u32 height, const char *title, Window *share)
 {
     LogVerbose("HADAL: creating a new window!");
     (void)width;
@@ -10,7 +10,7 @@ HadalWindow *HadalCreateWindow(u32 width, u32 height, const char *title, HadalWi
     return NULL;
 }
 
-void HadalDestroyWindow(HadalWindow *window)
+void HadalDestroyWindow(Window *window)
 {
     LogVerbose("HADAL: destroying a window!");
     if (window) {
@@ -18,7 +18,7 @@ void HadalDestroyWindow(HadalWindow *window)
     }    
 }
 
-u32 HadalGetFlags(HadalWindow *window)
+u32 HadalGetFlags(Window *window)
 {
     if (window)
         return window->flags;

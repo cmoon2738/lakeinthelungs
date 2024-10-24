@@ -1,6 +1,6 @@
 #include "renderer.h"
 
-RanaContext *RanaCreateContext(HadalWindow *window)
+RanaContext *RanaCreateContext(Window *window)
 {
     LogVerbose("RANA: creating a new rendering context!");
     (void)window;
@@ -14,7 +14,6 @@ void RanaDestroyContext(RanaContext *rana)
         /* TODO */
     }
 }
-
 
 u32 RanaGetFlags(RanaContext *rana)
 {

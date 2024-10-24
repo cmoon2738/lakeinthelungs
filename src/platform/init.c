@@ -115,7 +115,7 @@ static void terminate(void)
 {
     LogVerbose("HADAL: terminating...");
 
-    for (HadalWindow *window = HADAL.window_list_head; window; window = window->next) {
+    for (Window *window = HADAL.window_list_head; window; window = window->next) {
         HadalDestroyWindow(window);
     }
 

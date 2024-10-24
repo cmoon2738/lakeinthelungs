@@ -1,5 +1,5 @@
-#ifndef _LAKE_hadopelagic_h_
-#define _LAKE_hadopelagic_h_
+#ifndef _AMW_hadopelagic_h_
+#define _AMW_hadopelagic_h_
 
 //#include "system.h"
 #include "hadal.h"
@@ -12,7 +12,7 @@
 
 #ifdef LAKE_NATIVE_WAYLAND
     #include "linux/wl.h"
-    #define HADOPELAGIC_WAYLAND_WINDOW_STATE HadalWindowWayland wl;
+    #define HADOPELAGIC_WAYLAND_WINDOW_STATE WindowWayland wl;
     #define HADOPELAGIC_WAYLAND_GLOBAL_STATE HadopelagicWayland wl;
 #else
     #define HADOPELAGIC_WAYLAND_WINDOW_STATE
@@ -23,13 +23,14 @@
     #include "../renderer/vk.h"
 #endif
 
-struct HadalWindow {
-    HadalWindow *next;
+struct Window {
+    Window *next;
 
-    char        *title;
-    u32          flags;
+    char   *title;
+    u32     flags;
 
-    HadalOutput *output;
+    /* Binded output in fullscreen mode */
+    Output *output;
 
     HADOPELAGIC_WAYLAND_WINDOW_STATE
 };
@@ -42,7 +43,7 @@ typedef struct HadalAPI {
 
 #ifdef LAKE_NATIVE_VULKAN
     bool     (*vkPhysicalDevicePresentationSupport)(VkPhysicalDevice pd, u32 queue_family);
-    VkResult (*vkCreateSurface)(VkInstance instance, HadalWindow *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
+    VkResult (*vkCreateSurface)(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 #endif
 } HadalAPI;
 
@@ -50,9 +51,9 @@ typedef struct Hadopelagic {
     bool          initialized;
     HadalAPI      api;
 
-    HadalWindow  *window_list_head;
+    Window       *window_list_head;
 
-    HadalOutput **outputs;
+    Output      **outputs;
     i32           output_count;
 
     HADOPELAGIC_WAYLAND_GLOBAL_STATE
@@ -65,4 +66,4 @@ extern Hadopelagic HADAL;
 
 extern bool _HadalDebugVerifyAPI(const HadalAPI *api);
 
-#endif /* _LAKE_hadopelagic_h_ */
+#endif /* _AMW_hadopelagic_h_ */

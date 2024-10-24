@@ -1,5 +1,5 @@
-#ifndef _LAKE_hadal_h_
-#define _LAKE_hadal_h_
+#ifndef _AMW_hadal_h_
+#define _AMW_hadal_h_
 
 #include "../common.h"
 
@@ -25,13 +25,13 @@ extern i32  HadalInit(u32 backend_id);
 extern void HadalTerminate(void);
 
 /** Opaque window handle. */
-typedef struct HadalWindow HadalWindow;
+typedef struct Window Window;
 
-extern HadalWindow *HadalCreateWindow(u32 width, u32 height, const char *title, HadalWindow *share);
-extern void         HadalDestroyWindow(HadalWindow *window);
-extern u32          HadalGetFlags(HadalWindow *window);
+extern Window *HadalCreateWindow(u32 width, u32 height, const char *title, Window *share);
+extern void    HadalDestroyWindow(Window *window);
+extern u32     HadalGetFlags(Window *window);
 
 /** Opaque output monitor handle. */
-typedef struct HadalOutput HadalOutput;
+typedef struct Output Output;
 
-#endif /* _LAKE_hadal_h_ */
+#endif /* _AMW_hadal_h_ */
