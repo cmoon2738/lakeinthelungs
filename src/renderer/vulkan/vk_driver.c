@@ -1,6 +1,6 @@
 #include "vk.h"
-#include "../platform/system.h"
-#include "renderer.h"
+#include "../../platform/system.h"
+#include "../renderer.h"
 
 static void gen_load_loader(void *context, PFN_vkVoidFunction (*load)(void *, const char *));
 static void gen_load_instance(void *context, PFN_vkVoidFunction (*load)(void *, const char *));
@@ -64,8 +64,8 @@ bool vulkan_open_driver(void)
 
     RanaAPI vulkan = {
         .id = RANA_BACKEND_VULKAN,
-        .init = RanaVulkan_init,
-        .terminate = RanaVulkan_terminate,
+        .init = rana_vk_init,
+        .terminate = rana_vk_terminate,
     };
     if (!_rana_debug_verify_api(&vulkan)) {
         log_debug("RANA: internal API for Vulkan is not up to date.");
@@ -112,6 +112,17 @@ u32 vulkan_version(void)
         return VK_API_VERSION_1_0;
     return 0;
 }
+
+bool vulkan_has_extension(const VkExtensionProperties *avail, u32 count, const char *ext)
+{
+    for (size_t i = 0; i < count; ++i) {
+        if (!strcmp(avail[i].extensionName, ext)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 static void gen_load_loader(void *context, PFN_vkVoidFunction (*load)(void *, const char *))
 {

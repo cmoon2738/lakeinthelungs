@@ -1,5 +1,6 @@
 #include "vk.h"
 
+#ifdef VK_EXT_debug_utils
 static VkDebugUtilsMessengerEXT validation_messenger = VK_NULL_HANDLE;
 
 /* layer message to string */
@@ -75,7 +76,7 @@ void vulkan_create_validation_layers(VkInstance instance)
             .pUserData = NULL
         };
         RANA_VK_VERIFY(vkCreateDebugUtilsMessengerEXT(instance, &callback_info, NULL, &validation_messenger));
-        log_debug("Vulkan validation layers created");
+        log_debug("Vulkan validation layers created!");
     }
 }
 
@@ -84,9 +85,13 @@ void vulkan_destroy_validation_layers(VkInstance instance)
     if (validation_messenger != VK_NULL_HANDLE) {
         vkDestroyDebugUtilsMessengerEXT(instance, validation_messenger, NULL);
         validation_messenger = VK_NULL_HANDLE;
-        log_debug("Vulkan validation layers destroyed");
+        log_debug("Vulkan validation layers destroyed!");
     }
 }
+#else
+void vulkan_create_validation_layers(VkInstance instance) { (void)instance; }
+void vulkan_destroy_validation_layers(VkInstance instance) { (void)instance; }
+#endif /* VK_EXT_debug_utils */
 
 const char *vulkan_result(VkResult code)
 {

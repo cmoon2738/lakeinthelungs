@@ -1,8 +1,9 @@
 #ifndef _AMW_vk_h_
 #define _AMW_vk_h_
 
-#include "../common.h"
-#include "rana.h"
+#include "../../common.h"
+#include "../../platform/hadal.h"
+#include "../../core/memory.h"
 
 #ifndef VK_NO_PROTOTYPES
     #define VK_NO_PROTOTYPES
@@ -54,6 +55,9 @@ extern void vulkan_load_device_pointers(VkDevice device);
 /** Vulkan driver version. */
 extern u32 vulkan_version(void);
 
+/** Check for vulkan instance/device extension. */
+bool vulkan_has_extension(const VkExtensionProperties *avail, u32 count, const char *ext);
+
 /** Returns a string for a given VkResult. */
 extern const char *vulkan_result(VkResult code);
 
@@ -67,21 +71,36 @@ extern const char *vulkan_result(VkResult code);
     }
 #else
     #define RANA_VK_VERIFY(x) (void)(x)
-#endif /* LAKE_DEBUG */
+#endif /* AMW_DEBUG */
 
 typedef enum {
-    /* instance */
-    RANA_VK_EXT_SURFACE_BIT = 0,                /**< VK_KHR_surface */
+    /* instance, mandatory */
+    RANA_VK_EXT_SURFACE_BIT = 0,                        /**< VK_KHR_surface */
+    RANA_VK_EXT_GET_PHYSICAL_DEVICE_PROPERTIES2_BIT,    /**< VK_KHR_get_physical_device_properties2 */
 
-    /* device */
-    RANA_VK_EXT_SWAPCHAIN_BIT,                  /**< VK_KHR_swapchain */
-    RANA_VK_EXT_DYNAMIC_RENDERING_BIT,          /**< VK_KHR_dynamic_rendering */
-    RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT,       /**< VK_KHR_ray_tracing_pipeline */
+    /* layers, wanted in AMW_DEBUG only */
+    RANA_VK_EXT_DEBUG_UTILS_BIT,                    /**< VK_EXT_debug_utils */
+    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT,       /**< VK_KHR_shader_non_semantic_info */
+    RANA_VK_EXT_VALIDATION_LAYERS_BIT,              /**< VK_LAYER_KHRONOS_validation */
 
-    /* layers */
-    RANA_VK_EXT_DEBUG_UTILS_BIT,                /**< VK_EXT_debug_utils */
-    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT,   /**< VK_KHR_shader_non_semantic_info */
-    RANA_VK_EXT_VALIDATION_LAYERS_BIT,          /**< VK_LAYER_KHRONOS_validation */
+    /* device, all wanted */
+    RANA_VK_EXT_SWAPCHAIN_BIT,                      /**< VK_KHR_swapchain */
+    RANA_VK_EXT_MULTI_DRAW_INDIRECT_BIT,            /**< VK_EXT_multi_draw */
+    RANA_VK_EXT_PUSH_DESCRIPTOR_BIT,                /**< VK_KHR_push_descriptor */
+    RANA_VK_EXT_EXTENDED_DYNAMIC_STATE3_BIT,        /**< VK_EXT_extended_dynamic_state3 */
+
+    /* TODO deprecated extensions, but should be enabled only if running older api versions (1.2, 1.1) */
+    //RANA_VK_EXT_DYNAMIC_RENDERING_BIT,              /**< VK_KHR_dynamic_rendering */
+    //RANA_VK_EXT_SYNCHRONIZATION2_BIT,               /**< VK_KHR_synchronization2 */
+    //RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT,             /**< VK_KHR_timeline_semaphore */
+    //RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT,            /**< VK_EXT_descriptor_indexing */
+    //RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT,         /**< VK_EXT_extended_dynamic_state */
+    //RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT,        /**< VK_EXT_extended_dynamic_state2 */
+
+    /* device, used if available */
+    RANA_VK_EXT_DEFERRED_HOST_OPERATIONS_BIT,       /**< VK_KHR_deferred_host_operations */
+    RANA_VK_EXT_ACCELERATION_STRUCTURE_BIT,         /**< VK_KHR_acceleration_structure */
+    RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT,           /**< VK_KHR_ray_tracing_pipeline */
 } VulkanExtensions;
 
 /* vk_validation.c */
@@ -93,25 +112,36 @@ extern char    *vulkan_get_surface_extension(void); /* from Hadal's backend */
 extern bool     vulkan_physical_device_presentation_support(VkPhysicalDevice pd, u32 queue_family);
 extern VkResult vulkan_create_surface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 
+/* vk_gpu.c */
+extern i32 vulkan_find_device_memory_type(VkPhysicalDevice gpu, VkMemoryPropertyFlags flags, u32 req_bits);
+
 /* Per context Vulkan state */
 typedef struct RanaVulkanContext {
     VkSurfaceKHR surface;
+    /* queue, swapchain, renderpasses & framebuffers/dynamic rendering, 
+     * descriptors, pipeline, command buffers */
 } RanaVulkanContext;
 
 /* Renderer global Vulkan state: RANA.vk */
 typedef struct RanaVulkanRenderer {
     void   *module; /* drivers loaded at runtime */
-    u32     ext_available;
-    u32     ext_enabled;
+    u64     ext_available;
+    u64     ext_enabled;
 
-    VkInstance              instance;
-    VkPhysicalDevice        physical_device;
-    VkDevice                device;
+    VkInstance                  instance;
+    VkPhysicalDevice            physical_device;
+    VkPhysicalDeviceProperties  physical_device_properties;
+    VkPhysicalDeviceFeatures    physical_device_features;
+    VkDevice                    device;
 } RanaVulkanRenderer;
 
 /* Rana backend API */
-extern i32  RanaVulkan_init(void);
-extern void RanaVulkan_terminate(void);
+extern i32  rana_vk_init(void);
+extern void rana_vk_terminate(void);
+
+/** Out arguments will be passed count of wanted device extensions, 
+ *  and extension bits, used in logical device initialization */
+extern bool rana_vk_select_physical_device(Arena *a, i32 preferred_device_idx, u32 *ext_count);
 
 /* up to date with version 1.3.294 */
 #if defined(VK_VERSION_1_0)

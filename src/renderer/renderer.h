@@ -5,7 +5,7 @@
 #include "../core/memory.h"
 
 #ifdef AMW_NATIVE_VULKAN
-    #include "vk.h"
+    #include "vulkan/vk.h"
     #define RANA_VK_CONTEXT_STATE RanaVulkanContext vk;
     #define RANA_VK_GLOBAL_STATE RanaVulkanRenderer vk;
 #else
@@ -34,8 +34,8 @@ typedef struct RanaRenderer {
     bool            initialized;
     RanaAPI         api;
 
-    Arena           frame_arena; /* reset at initialization, and every begin_frame */
     RanaContext    *context_list_head;
+    Arena           temporary_arena;
 
     RANA_VK_GLOBAL_STATE
 } RanaRenderer;

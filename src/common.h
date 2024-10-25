@@ -1209,15 +1209,18 @@
 #define max(x,y)         (((x) > (y)) ? (x) : (y))
 #define swap(type,a,b)   { type temp = a; a = b; b = temp; }
 
-#define read_flags(flags,mask)   ((flags) & (mask))   /* check for flags */
-#define set_flags(flags,mask)    ((flags) |= (mask))  /* set the specified flags to 1 */
-#define unset_flags(flags,mask)  ((flags) &= ~(mask)) /* set the specified flags to 0 */
-#define toggle_flags(flags,mask) ((flags) ^= (mask))  /* toggle the specified flags */
+#define read_flags(flags,mask)   ((flags) & (mask))    /* check for flags */
+#define set_flags(flags,mask)    ((flags) |= (mask))   /* set the specified flags to 1 */
+#define unset_flags(flags,mask)  ((flags) &= ~(mask))  /* set the specified flags to 0 */
+#define mask_flags(flags,mask)   ((flags) &= (mask))   /* preserve the specified flags */
+#define toggle_flags(flags,mask) ((flags) ^= (mask))   /* toggle the specified flags */
 
 #define read_bit(flags,bit)     (flags & (1 << bit))   /* check for bit */
 #define set_bit(flags,bit)      (flags |= (1 << bit))  /* set the specified bits to 1 */
 #define unset_bit(flags,bit)    (flags &= ~(1 << bit)) /* set the specified bits to 0 */
 #define toggle_bit(flags,bit)   (flags ^= (1 << bit))  /* toggle the specified bits */
+
+#define bitmask(n) (((1 << (n)) -1 )) /* a bitstream of n length */
 
 #ifndef false
     #define false 0

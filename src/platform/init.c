@@ -11,6 +11,7 @@ static const char *backend_string(u32 id)
         case HADAL_BACKEND_COCOA: return "cocoa";
         case HADAL_BACKEND_IOS: return "ios";
         case HADAL_BACKEND_ANDROID: return "android";
+        case HADAL_BACKEND_HTML5: return "html5";
         case HADAL_BACKEND_WAYLAND: return "wayland";
         case HADAL_BACKEND_XCB: return "xcb";
         case HADAL_BACKEND_KMS: return "kms";
@@ -29,9 +30,11 @@ static const struct { u32 id; bool (*connect)(void); } supported_backends[] = {
     /* TODO */
 #elif defined(AMW_PLATFORM_ANDROID)
     /* TODO */
+#elif defined(AMW_PLATFORM_EMSCRIPTEN)
+    /* TODO */
 #endif
 #ifdef AMW_NATIVE_WAYLAND
-    { HADAL_BACKEND_WAYLAND, HadalWayland_connect},
+    { HADAL_BACKEND_WAYLAND, hadal_wayland_connect},
 #endif
 #ifdef AMW_NATIVE_XCB
     /* TODO */
@@ -50,6 +53,7 @@ static bool select_backend(u32 id)
         id != HADAL_BACKEND_COCOA &&
         id != HADAL_BACKEND_IOS &&
         id != HADAL_BACKEND_ANDROID &&
+        id != HADAL_BACKEND_HTML5 &&
         id != HADAL_BACKEND_WAYLAND &&
         id != HADAL_BACKEND_XCB &&
         id != HADAL_BACKEND_KMS &&
@@ -61,7 +65,7 @@ static bool select_backend(u32 id)
 
     /* only allow headless mode if explicitly requested */
     if (id == HADAL_BACKEND_HEADLESS) {
-        if (!HadalHeadless_connect()) {
+        if (!hadal_headless_connect()) {
             log_error("HADAL: failed to initialize headless mode.");
             return false;
         }

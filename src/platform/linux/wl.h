@@ -13,15 +13,15 @@ typedef struct HadopelagicWayland {
     struct wl_display *display;
 } HadopelagicWayland;
 
-extern bool HadalWayland_connect(void);
-extern i32  HadalWayland_init(void);
-extern void HadalWayland_terminate(void);
+extern bool hadal_wayland_connect(void);
+extern i32  hadal_wayland_init(void);
+extern void hadal_wayland_terminate(void);
 
 #ifdef AMW_NATIVE_VULKAN
-#include "../../renderer/vk.h"
+#include "../../renderer/vulkan/vk.h"
 
-extern bool HadalWayland_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family);
-extern VkResult HadalWayland_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
+extern bool hadal_wayland_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family);
+extern VkResult hadal_wayland_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 #endif
 
 #endif /* _AMW_wayland_h_ */

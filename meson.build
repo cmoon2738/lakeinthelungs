@@ -24,9 +24,9 @@ defs = [
 cross = []
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
-    defs += '-DLAKE_DEBUG'
+    defs += '-DAMW_DEBUG'
 else 
-    defs += '-DLAKE_NDEBUG'
+    defs += '-DAMW_NDEBUG'
 endif
 
 dep_threads = dependency('threads')

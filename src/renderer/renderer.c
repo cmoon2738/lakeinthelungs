@@ -1,4 +1,5 @@
 #include "common.h"
+#include "core/memory.h"
 #include "renderer/rana.h"
 #include "renderer.h"
 
@@ -8,12 +9,15 @@ static const struct { u32 id; bool (*connect)(void); } supported_backends[] = {
 #ifdef AMW_NATIVE_VULKAN
     { RANA_BACKEND_VULKAN, vulkan_open_driver },
 #endif
+#ifdef AMW_NATIVE_WEBGPU
+#endif
 };
 
 static const char *backend_string(u32 id)
 {
     switch (id) {
         case RANA_BACKEND_VULKAN: return "vulkan";
+        case RANA_BACKEND_WEBGPU: return "webgpu";
         case RANA_BACKEND_NULL: return "null";
         default: break;
     }
@@ -26,6 +30,7 @@ static bool select_backend(u32 id)
 
     if (id != RANA_ANY_BACKEND &&
         id != RANA_BACKEND_VULKAN &&
+        id != RANA_BACKEND_WEBGPU &&
         id != RANA_BACKEND_NULL)
     {
         log_error("RANA: invalid backend ID '%X : %s'", id, backend_string(id));
@@ -98,6 +103,7 @@ static void terminate(void)
     if (RANA.api.terminate)
         RANA.api.terminate();
 
+    arena_free(&RANA.temporary_arena);
     zero(RANA);
 }
 

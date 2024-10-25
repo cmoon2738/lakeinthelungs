@@ -1,41 +1,44 @@
+#include "common.h"
 #include "wl.h"
 #include "../hadopelagic.h"
 
-bool HadalWayland_connect(void)
+bool hadal_wayland_connect(void)
 {
-    log_verbose("HADAL: try connecting to Wayland...");
+    log_verbose("Try connecting to Wayland...");
 
     const HadalAPI wayland = {
         .id = HADAL_BACKEND_WAYLAND,
-        .init = HadalWayland_init,
-        .terminate = HadalWayland_terminate,
+        .init = hadal_wayland_init,
+        .terminate = hadal_wayland_terminate,
 #ifdef AMW_NATIVE_VULKAN
-        .vkPhysicalDevicePresentationSupport = HadalWayland_vkPhysicalDevicePresentationSupport,
-        .vkCreateSurface = HadalWayland_vkCreateSurface,
+        .vkPhysicalDevicePresentationSupport = hadal_wayland_vkPhysicalDevicePresentationSupport,
+        .vkCreateSurface = hadal_wayland_vkCreateSurface,
 #endif /* AMW_NATIVE_VULKAN */
     };
     if (!_hadal_debug_verify_api(&wayland)) {
-        log_debug("HADAL: internal API for Wayland is not up to date.");
+        log_debug("Internal API for Wayland is not up to date.");
         return false;
     }
 
     struct wl_display *display = wl_display_connect(NULL);
     if (!display) {
-        log_debug("HADAL: can't connect to a Wayland display.");
+        log_debug("Can't connect to a Wayland display.");
         return false;
     }
     HADAL.wl.display = display;
     HADAL.api = wayland;
+
+    log_verbose("Connected to a Wayland display!");
     return true;
 }
 
-i32 HadalWayland_init(void)
+i32 hadal_wayland_init(void)
 {
-    log_verbose("HADAL: initializing Wayland...");
+    log_verbose("Initializing Wayland display backend...");
     return AMW_SUCCESS;
 }
 
-void HadalWayland_terminate(void)
+void hadal_wayland_terminate(void)
 {
-    log_verbose("HADAL: terminating Wayland...");
+    log_verbose("Terminating Wayland display backend...");
 }

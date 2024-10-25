@@ -21,7 +21,8 @@
 #endif
 
 #ifdef AMW_NATIVE_VULKAN
-    #include "../renderer/vk.h"
+    #include "../renderer/vulkan/vk.h"
+#elif AMW_NATIVE_WEBGPU
 #endif
 
 struct Window {
@@ -45,7 +46,7 @@ typedef struct HadalAPI {
 #ifdef AMW_NATIVE_VULKAN
     bool     (*vkPhysicalDevicePresentationSupport)(VkPhysicalDevice pd, u32 queue_family);
     VkResult (*vkCreateSurface)(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
-#endif
+#endif /* AMW_NATIVE_VULKAN */
 } HadalAPI;
 
 typedef struct Hadopelagic {

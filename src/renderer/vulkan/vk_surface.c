@@ -1,39 +1,27 @@
-#include "platform/hadal.h"
 #include "vk.h"
-#include "../platform/hadopelagic.h"
+#include "../../platform/hadopelagic.h"
 
 char *vulkan_get_surface_extension(void)
 {
     u32 id = hadal_current_backend_id();
     switch (id) {
-#ifdef VK_USE_PLATFORM_WIN32_KHR
         case HADAL_BACKEND_WIN32:
-            return VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
-#endif
-#ifdef VK_USE_PLATFORM_METAL_EXT
-        case HADAL_BACKEND_COCOA:
-        case HADAL_BACKEND_IOS:
-            return VK_EXT_METAL_SURFACE_EXTENSION_NAME;
-#endif
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
+            return "VK_KHR_win32_surface";
+        case HADAL_BACKEND_COCOA: /* return "VK_MVK_macos_surface" */
+        case HADAL_BACKEND_IOS: /* return "VK_MVK_ios_surface" */
+            return "VK_EXT_metal_surface";
         case HADAL_BACKEND_ANDROID:
-            return VK_KHR_ANDROID_SURFACE_EXTENSION_NAME;
-#endif
-#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+            return "VK_KHR_android_surface";
         case HADAL_BACKEND_WAYLAND:
-            return VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME;
-#endif
-#ifdef VK_USE_PLATFORM_XCB_KHR
+            return "VK_KHR_wayland_surface";
         case HADAL_BACKEND_XCB:
-            return VK_KHR_XCB_SURFACE_EXTENSION_NAME;
-#endif
-#ifdef VK_USE_PLATFORM_KMS_KHR
+            return "VK_KHR_xcb_surface";
         case HADAL_BACKEND_KMS:
-            return VK_KHR_DISPLAY_EXTENSION_NAME;
-#endif
+            return "VK_KHR_display";
         case HADAL_BACKEND_HEADLESS:
-            return VK_EXT_HEADLESS_SURFACE_EXTENSION_NAME;
+            return "VK_EXT_headless_surface";
         case HADAL_ANY_BACKEND: 
+        case HADAL_BACKEND_HTML5:
         default:
             return NULL;
     }
@@ -67,13 +55,13 @@ VkResult vulkan_create_surface(VkInstance instance, Window *window, const VkAllo
 #endif /* WINDOWS / APPLE / ANDROID */
 
 #if defined(AMW_NATIVE_WAYLAND)
-bool HadalWayland_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
+bool hadal_wayland_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
 {
     return vkGetPhysicalDeviceWaylandPresentationSupportKHR ?
         vkGetPhysicalDeviceWaylandPresentationSupportKHR(pd, queue_family, HADAL.wl.display) : false;
 }
 
-VkResult HadalWayland_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+VkResult hadal_wayland_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
 {
     VkResult out;
     VkWaylandSurfaceCreateInfoKHR wlsc_info;
@@ -96,14 +84,14 @@ VkResult HadalWayland_vkCreateSurface(VkInstance instance, Window *window, const
 #if defined(AMW_NATIVE_KMS)
 #endif /* AMW_NATIVE_KMS */
 
-bool HadalHeadless_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
+bool hadal_headless_vkPhysicalDevicePresentationSupport(VkPhysicalDevice pd, u32 queue_family)
 {
     (void)pd;
     (void)queue_family;
     return false;
 }
 
-VkResult HadalHeadless_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+VkResult hadal_headless_vkCreateSurface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
 {
     (void)instance;
     (void)window;

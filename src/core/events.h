@@ -3,6 +3,8 @@
 
 #include "../common.h"
 
+typedef union Event Event;
+
 typedef enum {
     EVENT_TYPE_INVALID = 0,
     EVENT_TYPE_USER = 0x100,
@@ -12,30 +14,32 @@ typedef enum {
 
 /** Fields shared by every event */
 typedef struct EventCommon {
-    u32 type;             /**< The EventType code indicated what event structure it is. */
-    u32 flags;            /**< Populated by a structures flag set, or 0. */
-    u64 ticks_ns;         /**< Populated using ticks_ns(). */
+    u32     type;           /**< The EventType code indicated what event structure it is. */
+    u32     flags;          /**< Populated by a structures flag set, or 0. */
+    u64     ticks_ns;       /**< Populated using ticks_ns(). */
+    //Event  *next;           /**< An connected event structure. */
 } EventCommon;
 
 /** Custom app-defined events */
 typedef struct EventUser {
-    u32   type;           /**< EVENT_TYPE_USER */
-    u32   flags;          /**< The user may pass in his boolean bit flags for checks. */
-    u64   ticks_ns;       /**< Populated using ticks_ns(). */
-    i32   code;           /**< User defined event code. */
-    void *data1;          /**< User defined data pointer. */
-    void *data2;          /**< User defined data pointer. */
-    void *data3;          /**< User defined data pointer. */
+    u32     type;           /**< EVENT_TYPE_USER */
+    u32     flags;          /**< The user may pass in his boolean bit flags for checks. */
+    u64     ticks_ns;       /**< Populated using ticks_ns(). */
+    //Event  *next;           /**< An connected event structure. */
+    i32     code;           /**< User defined event code. */
+    void   *data1;          /**< User defined data pointer. */
+    void   *data2;          /**< User defined data pointer. */
+    void   *data3;          /**< User defined data pointer. */
 } EventUser;
 
-typedef union Event {
+union Event {
     u32 type;
 
     EventCommon common;
     EventUser   user;
 
     u8 padding[48];
-} Event;
+};
 
 assert_static(sizeof(Event) == sizeof(((Event *)NULL)->padding), "Event union padding is not large enough");
 

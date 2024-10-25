@@ -7,6 +7,7 @@
 typedef enum {
     RANA_ANY_BACKEND = 0,
     RANA_BACKEND_VULKAN,
+    RANA_BACKEND_WEBGPU,
     RANA_BACKEND_NULL,
 } RanaBackendID;
 
