@@ -1,13 +1,10 @@
-#include "common.h"
-#include "platform/hadal.h"
 #include "wl.h"
 #include "../hadopelagic.h"
-#include "xdg-shell-protocol.h"
 
-#include <errno.h>
-#include <poll.h>
-#include <wayland-client-core.h>
-#include <wayland-client-protocol.h>
+#include "../../renderer/rana.h"
+
+//#include <errno.h>
+//#include <poll.h>
 
 static void resize_framebuffer(Window *window)
 {
@@ -20,6 +17,7 @@ static void resize_framebuffer(Window *window)
         /* TODO set opaque content area */
     }
     /* TODO framebuffer resized event */
+    rana_set_framebuffer_resized(); /* this only makes sense with only one window, so its fine :3 */
 }
 
 static bool resize_window(Window *window, i32 width, i32 height)
@@ -331,6 +329,12 @@ void hadal_wayland_destroy_window(Window *window)
     if (window->wl.surface)
         wl_surface_destroy(window->wl.surface);
     free(window->wl.app_id);
+}
+
+void hadal_wayland_get_framebuffer_size(Window *window, u32 *width, u32 *height)
+{
+    if (width) *width = window->wl.width;
+    if (height) *height = window->wl.height;
 }
 
 void hadal_wayland_show_window(Window *window)

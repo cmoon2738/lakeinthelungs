@@ -1,8 +1,5 @@
-#include "../../common.h"
-#include "core/memory.h"
 #include "vk.h"
 #include "../renderer.h"
-#include <vulkan/vulkan_core.h>
 
 static const char *device_type_string(VkPhysicalDeviceType type)
 {
@@ -89,7 +86,8 @@ static u64 supported_device_extensions(Arena *arena, const VkPhysicalDevice *pd)
     return ext_bits;
 }
 
-i32 vulkan_find_device_memory_type(const VkPhysicalDevice pd, VkMemoryPropertyFlags flags, u32 req_bits)
+/*
+u32 vulkan_find_device_memory_type(const VkPhysicalDevice pd, VkMemoryPropertyFlags flags, u32 req_bits)
 {
     VkPhysicalDeviceMemoryProperties props;
     vkGetPhysicalDeviceMemoryProperties(pd, &props);
@@ -101,8 +99,9 @@ i32 vulkan_find_device_memory_type(const VkPhysicalDevice pd, VkMemoryPropertyFl
             }
         }
     }
-    return -1;
+    return 0;
 }
+*/
 
 static u32 count_bits(u64 n) {
     u32 count = 0;
@@ -150,7 +149,6 @@ static i32 select_best_gpu(Arena *arena,
         if (queue_family_count == 0)
             continue;
 
-        /* no presentation support? */
         //if (!vulkan_physical_device_presentation_support(pds[i], queue_family_count)) {
         //    log_debug("Vulkan device no presentation support, make sure Hadal is initialized.");
         //    continue;
@@ -187,6 +185,26 @@ static i32 select_best_gpu(Arena *arena,
     }
     return best_idx;
 }
+
+u32 vulkan_find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(RANA.vk.physical_device, &memory_properties);
+
+    for (u32 i = 0; i < memory_properties.memoryTypeCount; i++) {
+        if (!(type_filter & (1U << i))) {
+            continue;
+        }
+
+        VkMemoryPropertyFlags type_properties = memory_properties.memoryTypes[i].propertyFlags;
+        if ((type_properties & properties) == properties) {
+            return i;
+        }
+    }
+
+    return UINT32_MAX;
+}
+
 
 bool rana_vk_select_physical_device(Arena *arena, i32 preferred_device_idx, u32 *ext_count)
 {
@@ -247,8 +265,10 @@ bool rana_vk_select_physical_device(Arena *arena, i32 preferred_device_idx, u32 
             set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT);
         if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT))
             set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT);
+#ifndef AMW_NDEBUG
         if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT))
             set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT);
+#endif /* AMW_NDEBUG */
     /* https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_VERSION_1_2.html */
     } else if (vulkan_version() < VK_API_VERSION_1_2) {
         if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT))
@@ -263,6 +283,26 @@ bool rana_vk_select_physical_device(Arena *arena, i32 preferred_device_idx, u32 
 
     vkGetPhysicalDeviceFeatures(RANA.vk.physical_device, &RANA.vk.physical_device_features);
     vkGetPhysicalDeviceProperties(RANA.vk.physical_device, &RANA.vk.physical_device_properties);
+
+    VkSampleCountFlags counts = 
+        RANA.vk.physical_device_properties.limits.framebufferColorSampleCounts &
+        RANA.vk.physical_device_properties.limits.framebufferDepthSampleCounts;
+
+    if (counts & VK_SAMPLE_COUNT_64_BIT) {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_64_BIT;
+    } else if (counts & VK_SAMPLE_COUNT_32_BIT) {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_32_BIT;
+    } else if (counts & VK_SAMPLE_COUNT_16_BIT) {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_16_BIT;
+    } else if (counts & VK_SAMPLE_COUNT_8_BIT) {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_8_BIT;
+    } else if (counts & VK_SAMPLE_COUNT_4_BIT) {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_4_BIT;
+    } else if (counts & VK_SAMPLE_COUNT_2_BIT) {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_2_BIT;
+    } else {
+        RANA.vk.msaa_samples = VK_SAMPLE_COUNT_1_BIT;
+    }
 
     u32 vv_major = (RANA.vk.physical_device_properties.apiVersion >> 22U);
     u32 vv_minor = (RANA.vk.physical_device_properties.apiVersion >> 12U) & 0x3ffU;

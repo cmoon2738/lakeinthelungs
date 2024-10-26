@@ -56,12 +56,16 @@ static void run_mainloop(void)
             }
             AMW.app->event(AMW.app->data, event);
         }
+        rana_begin_frame();
 
         AMW.app->frame(AMW.app->data, AMW.delta_time);
 
         /* if (read_flags(hadal_get_flags(AMW.window), WINDOW_FLAG_SHOULD_CLOSE))
                 set_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT); */
 
+        rana_end_frame();
+
+        /* TODO testing */
         set_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT);
     }
     /* When the main loop returns, the fiber job system 
@@ -76,7 +80,10 @@ static void a_moonlit_walk(AppDescription *app_desc)
     log_set_level(option_log_level);
 
     hadal_init(option_hadal_backend);
-    AMW.window = hadal_create_window(800, 600, AMW.app->name, NULL, 0);
+    AMW.window = hadal_create_window(800, 600, AMW.app->name, NULL, 
+            WINDOW_FLAG_VISIBLE
+          | WINDOW_FLAG_RESIZABLE
+    );
 
     rana_init(RANA_ANY_BACKEND, AMW.window);
 

@@ -81,6 +81,7 @@ bool hadal_wayland_connect(void)
         .terminate = hadal_wayland_terminate,
         .create_window = hadal_wayland_create_window,
         .destroy_window = hadal_wayland_destroy_window,
+        .get_framebuffer_size = hadal_wayland_get_framebuffer_size,
         .show_window = hadal_wayland_show_window,
         .hide_window = hadal_wayland_hide_window,
 #ifdef AMW_NATIVE_VULKAN

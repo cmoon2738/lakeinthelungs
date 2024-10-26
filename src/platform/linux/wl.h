@@ -57,6 +57,7 @@ extern void hadal_wayland_terminate(void);
 
 extern bool hadal_wayland_create_window(Window *window, u32 width, u32 height);
 extern void hadal_wayland_destroy_window(Window *window);
+extern void hadal_wayland_get_framebuffer_size(Window *window, u32 *width, u32 *height);
 
 extern void hadal_wayland_show_window(Window *window);
 extern void hadal_wayland_hide_window(Window *window);

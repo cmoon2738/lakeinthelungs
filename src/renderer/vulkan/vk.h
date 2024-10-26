@@ -93,7 +93,7 @@ typedef enum {
     RANA_VK_EXT_ACCELERATION_STRUCTURE_BIT,         /**< VK_KHR_acceleration_structure */
     RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT,           /**< VK_KHR_ray_tracing_pipeline */
 
-    /* deprecated extensions, but should be enabled only if running older api versions (1.2, 1.1) */
+    /* deprecated extensions, for backwards compatibility */
     RANA_VK_EXT_DYNAMIC_RENDERING_BIT,              /**< VK_KHR_dynamic_rendering */
     RANA_VK_EXT_SYNCHRONIZATION2_BIT,               /**< VK_KHR_synchronization2 */
     RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT,             /**< VK_KHR_timeline_semaphore */
@@ -113,21 +113,13 @@ extern bool     vulkan_physical_device_presentation_support(VkPhysicalDevice pd,
 extern VkResult vulkan_create_surface(VkInstance instance, Window *window, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 
 /* vk_gpu.c */
-extern i32 vulkan_find_device_memory_type(VkPhysicalDevice gpu, VkMemoryPropertyFlags flags, u32 req_bits);
-
-/* Per context Vulkan state */
-typedef struct RanaVulkanContext {
-    VkQueue      graphics_queue;
-    /* queue, swapchain, renderpasses & framebuffers/dynamic rendering, 
-     * descriptors, pipeline, command buffers */
-} RanaVulkanContext;
+extern u32 vulkan_find_memory_type(u32 type_filter, VkMemoryPropertyFlags properties);
 
 /* Renderer global Vulkan state: RANA.vk */
-typedef struct RanaVulkanRenderer {
+typedef struct RanaVulkan {
     void   *module; /* drivers loaded at runtime */
     u64     ext_available;
     u64     ext_enabled;
-    u32     queue_family_index;
 
     VkInstance                  instance;
     VkPhysicalDevice            physical_device;
@@ -135,15 +127,92 @@ typedef struct RanaVulkanRenderer {
     VkPhysicalDeviceFeatures    physical_device_features;
     VkDevice                    device;
     VkSurfaceKHR                surface;
-} RanaVulkanRenderer;
+
+    VkQueue         graphics_queue;
+    VkQueue         transfer_queue;
+    VkQueue         present_queue;
+    u32             queue_family_indices[3];
+    u32             queue_family_count;
+
+    VkSwapchainKHR  swapchain;
+    VkImage        *swapchain_images;
+    VkImageView    *swapchain_image_views;
+    VkFormat        swapchain_image_format;
+    VkExtent2D      swapchain_extent;
+    u32             swapchain_image_count;
+
+    VkImage         color_image;
+    VkDeviceMemory  color_image_memory;
+    VkImageView     color_image_view;
+
+    VkDescriptorSetLayout descriptor_set_layout;
+    VkPipelineLayout      pipeline_layout;
+    VkPipeline            graphics_pipeline;
+
+    VkBuffer        vertex_buffer;
+    VkDeviceMemory  vertex_buffer_memory;
+    VkBuffer        index_buffer;
+    VkDeviceMemory  index_buffer_memory;
+
+    VkBuffer        uniform_buffers[RANA_VK_MAX_FRAMES];
+    VkDeviceMemory  uniform_buffers_memory[RANA_VK_MAX_FRAMES];
+    void           *uniform_buffers_mapped[RANA_VK_MAX_FRAMES];
+
+    VkDescriptorPool    descriptor_pool;
+    VkDescriptorSet     descriptor_sets[RANA_VK_MAX_FRAMES];
+
+    VkCommandPool       command_pool;
+    VkCommandBuffer     command_buffers[RANA_VK_MAX_FRAMES];
+
+    VkSemaphore image_available_semaphores[RANA_VK_MAX_FRAMES];
+    VkSemaphore render_finished_semaphores[RANA_VK_MAX_FRAMES];
+    VkFence     fences[RANA_VK_MAX_FRAMES];
+
+    VkSampleCountFlagBits msaa_samples;
+} RanaVulkan;
 
 /* Rana backend API */
 extern i32  rana_vk_init(void);
 extern void rana_vk_terminate(void);
 
+extern i32  rana_vk_begin_frame(void);
+extern void rana_vk_end_frame(void);
+
 /** Out arguments will be passed count of wanted device extensions, 
  *  and extension bits, used in logical device initialization */
 extern bool rana_vk_select_physical_device(Arena *a, i32 preferred_device_idx, u32 *ext_count);
+
+/* vk_swapchain.c */
+extern i32 rana_vk_create_swapchain(Arena *temp_arena, Arena *swapchain_arena);
+extern void rana_vk_cleanup_swapchain(Arena *swapchain_arena);
+extern i32 rana_vk_create_image_views(Arena *swapchain_arena);
+extern i32 rana_vk_create_color_resources(void);
+extern i32 rana_vk_recreate_swapchain(Arena *swapchain_arena, Arena *temp_arena);
+
+/* vk_pipeline.c */
+extern i32 rana_vk_create_graphics_pipeline(void);
+
+/* vk_sync.c */
+extern i32 rana_vk_create_synchronization_objects(void);
+
+/* vk_buffer.c */
+extern i32 rana_vk_create_buffer(VkDeviceSize size, 
+                                 VkBufferUsageFlags usage, 
+                                 VkMemoryPropertyFlags properties,
+                                 VkBuffer *buffer,
+                                 VkDeviceMemory *buffer_memory);
+extern i32 rana_vk_copy_buffer(VkBuffer dst_buffer, VkBuffer src_buffer, VkDeviceSize size);
+extern i32 rana_vk_create_vertex_buffer(void);
+extern i32 rana_vk_create_index_buffer(void);
+extern i32 rana_vk_create_uniform_buffers(void);
+
+/* vk_descriptor.c */
+extern i32 rana_vk_create_descriptor_pool(void);
+extern i32 rana_vk_create_descriptor_sets(void);
+
+/* vk_cmd.c */
+extern i32 rana_vk_create_command_buffers(void);
+extern i32 rana_vk_record_command_buffer(VkCommandBuffer cmd_buffer, u32 image_idx);
 
 /* up to date with version 1.3.294 */
 #if defined(VK_VERSION_1_0)

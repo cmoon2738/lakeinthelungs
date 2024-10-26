@@ -42,7 +42,6 @@ struct Window {
 
     char   *title;
     u32     flags;
-    u32     hints;
 
     i32     minwidth, minheight;
     i32     maxwidth, maxheight;
@@ -62,6 +61,7 @@ typedef struct HadalAPI {
 
     bool (*create_window)(Window *window, u32 width, u32 height);
     void (*destroy_window)(Window *window);
+    void (*get_framebuffer_size)(Window *window, u32 *width, u32 *height);
     void (*show_window)(Window *window);
     void (*hide_window)(Window *window);
 

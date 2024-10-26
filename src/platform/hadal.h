@@ -47,6 +47,8 @@ typedef struct Output Output;
 extern Window *hadal_create_window(u32 width, u32 height, const char *title, Output *output, u32 hints);
 extern void    hadal_destroy_window(Window *window);
 
+extern void    hadal_get_framebuffer_size(Window *window, u32 *width, u32 *height);
+
 extern u32     hadal_get_flags(Window *window);
 extern void    hadal_set_should_close(Window *window);
 extern void    hadal_set_visible(Window *window, bool visible);

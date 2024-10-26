@@ -85,7 +85,7 @@ void vulkan_destroy_validation_layers(VkInstance instance)
     if (validation_messenger != VK_NULL_HANDLE) {
         vkDestroyDebugUtilsMessengerEXT(instance, validation_messenger, NULL);
         validation_messenger = VK_NULL_HANDLE;
-        log_debug("Vulkan validation layers destroyed!");
+        log_debug("Destroying validation layers...");
     }
 }
 #else

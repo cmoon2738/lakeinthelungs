@@ -1,7 +1,6 @@
-#include "common.h"
-#include "core/memory.h"
-#include "renderer/rana.h"
 #include "renderer.h"
+#include "common.h"
+#include "renderer/rana.h"
 
 RanaRenderer RANA = {0};
 
@@ -99,6 +98,7 @@ static void terminate(void)
     if (RANA.api.terminate)
         RANA.api.terminate();
 
+    arena_free(&RANA.swapchain_arena);
     arena_free(&RANA.temporary_arena);
     zero(RANA);
 }
@@ -110,10 +110,11 @@ i32 rana_init(u32 backend_id, Window *window)
     if (backend_id <= 0)
         backend_id = HADAL_ANY_BACKEND;
 
+    if (!window)
+        return AMW_ERROR_STUB;
     if (!select_backend(backend_id))
         return AMW_ERROR_STUB;
 
-    assert_debug(window);
     RANA.window = window;
 
     if (RANA.api.init() != AMW_SUCCESS) {
@@ -131,6 +132,40 @@ void rana_terminate(void)
         terminate();
 }
 
+i32 rana_begin_frame(void)
+{
+    i32 result = AMW_SUCCESS;
+
+    if (read_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED))
+        result = _rana_recreate_swapchain(&RANA.swapchain_arena);
+
+    /* TODO */
+
+    return result;
+}
+
+void rana_end_frame(void)
+{
+
+}
+
+
+void rana_set_framebuffer_resized(void)
+{
+    if (RANA.initialized)
+        set_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED);
+}
+
+i32 _rana_recreate_swapchain(Arena *swapchain_arena)
+{
+    i32 result = AMW_SUCCESS;
+    if (RANA.initialized) {
+        result = RANA.api.recreate_swapchain(swapchain_arena, &RANA.temporary_arena);
+        unset_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED);
+    }
+    return result;
+}
+
 bool _rana_debug_verify_api(const RanaAPI *api)
 {
     bool out = true;
@@ -143,6 +178,9 @@ bool _rana_debug_verify_api(const RanaAPI *api)
 
     RANA_APICHECK(init)
     RANA_APICHECK(terminate)
+    RANA_APICHECK(recreate_swapchain)
+    RANA_APICHECK(begin_frame)
+    RANA_APICHECK(end_frame)
 
 #undef RANA_APICHECK
 #else

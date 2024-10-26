@@ -66,6 +66,9 @@ bool vulkan_open_driver(void)
         .id = RANA_BACKEND_VULKAN,
         .init = rana_vk_init,
         .terminate = rana_vk_terminate,
+        .recreate_swapchain = rana_vk_recreate_swapchain,
+        .begin_frame = rana_vk_begin_frame,
+        .end_frame = rana_vk_end_frame,
     };
     if (!_rana_debug_verify_api(&vulkan)) {
         log_debug("RANA: internal API for Vulkan is not up to date.");

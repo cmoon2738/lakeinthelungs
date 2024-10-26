@@ -173,6 +173,7 @@ bool _hadal_debug_verify_api(const HadalAPI *api)
     HADAL_APICHECK(terminate)
     HADAL_APICHECK(create_window)
     HADAL_APICHECK(destroy_window)
+    HADAL_APICHECK(get_framebuffer_size)
     HADAL_APICHECK(show_window)
     HADAL_APICHECK(hide_window)
 #ifdef AMW_NATIVE_VULKAN
