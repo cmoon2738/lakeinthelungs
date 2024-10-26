@@ -363,7 +363,7 @@ i32 rana_vk_init(void)
     log_verbose("Creating the command pool...");
     VkCommandPoolCreateInfo cmd_pool_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .flags = 0,
+        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         .queueFamilyIndex = RANA.vk.queue_family_indices[0], /* graphics queue idx */
     };
     RANA_VK_VERIFY(vkCreateCommandPool(RANA.vk.device,
@@ -425,6 +425,8 @@ i32 rana_vk_init(void)
 /* any RanaContext should be terminated by this point */
 void rana_vk_terminate(void)
 {
+    vkDeviceWaitIdle(RANA.vk.device);
+
     rana_vk_cleanup_swapchain(&RANA.swapchain_arena);
 
     log_verbose("Destroying uniform buffers...");
@@ -504,11 +506,12 @@ void rana_vk_terminate(void)
     vulkan_close_driver();
 }
 
-i32 rana_vk_begin_frame(void)
+void rana_vk_begin_frame(void)
 {
-    return AMW_SUCCESS;
+    /* for now, do nothing */
 }
 
 void rana_vk_end_frame(void)
 {
+    rana_vk_draw_frame(&RANA.swapchain_arena, &RANA.temporary_arena);
 }

@@ -21,7 +21,7 @@ extern bool rana_backend_is_supported(u32 backend_id);
 extern i32  rana_init(u32 backend_id, Window *window);
 extern void rana_terminate(void);
 
-extern i32  rana_begin_frame(void);
+extern void rana_begin_frame(void);
 extern void rana_end_frame(void);
 
 extern void rana_set_framebuffer_resized(void);

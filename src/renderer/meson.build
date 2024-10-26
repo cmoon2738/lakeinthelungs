@@ -12,6 +12,7 @@ else
         'vulkan/vk_buffer.c',
         'vulkan/vk_cmd.c',
         'vulkan/vk_descriptor.c',
+        'vulkan/vk_draw.c',
         'vulkan/vk_driver.c',
         'vulkan/vk_gpu.c',
         'vulkan/vk_pipeline.c',

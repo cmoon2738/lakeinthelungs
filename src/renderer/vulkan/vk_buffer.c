@@ -4,7 +4,7 @@
 #include "common.h"
 #include <vulkan/vulkan_core.h>
 
-static const Vertex CUBE_DEMO_VERTICES[] = {
+const Vertex CUBE_DEMO_VERTICES[5] = {
     { .pos = {  0.0f,  0.0f }, .color = { 0.25f, 0.25f, 0.25f } },
     { .pos = { -0.5f, -0.5f }, .color = { 1.00f, 0.00f, 0.25f } },
     { .pos = {  0.5f, -0.5f }, .color = { 0.76f, 0.25f, 0.25f } },
@@ -12,12 +12,15 @@ static const Vertex CUBE_DEMO_VERTICES[] = {
     { .pos = { -0.5f,  0.5f }, .color = { 0.25f, 0.75f, 0.25f } },
 };
 
-static const u16 CUBE_DEMO_INDICES[] = {
+const u16 CUBE_DEMO_INDICES[12] = {
     0, 1, 2,
     0, 2, 3,
     0, 3, 4,
     0, 4, 1
 };
+
+const size_t CUBE_DEMO_VERTICES_SIZE = array_size(CUBE_DEMO_VERTICES);
+const size_t CUBE_DEMO_INDICES_SIZE = array_size(CUBE_DEMO_INDICES);
 
 i32 rana_vk_create_buffer(VkDeviceSize size, 
                           VkBufferUsageFlags usage, 
@@ -198,4 +201,23 @@ i32 rana_vk_create_uniform_buffers(void)
                 0, &RANA.vk.uniform_buffers_mapped[i]);
     }
     return AMW_SUCCESS;
+}
+
+void vulkan_update_uniform_buffer(u32 current_image)
+{
+    f32 width = (f32)RANA.vk.swapchain_extent.width;
+    f32 height = (f32)RANA.vk.swapchain_extent.height;
+    f32 side = min(width, height);
+    mat2 view_matrix = {
+        { side / width, 0.0f },
+        { 0.0f, side / height },
+    };
+
+    UniformBufferObject ubo;
+    for (i32 i = 0; i < 2; i++) {
+        for (i32 j = 0; j < 2; j++) {
+            ubo.view[i][j] = view_matrix[i][j];
+        }
+    }
+    memcpy(RANA.vk.uniform_buffers_mapped[current_image], &ubo, sizeof(ubo));
 }

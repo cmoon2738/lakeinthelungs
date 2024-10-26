@@ -175,7 +175,7 @@ typedef struct RanaVulkan {
 extern i32  rana_vk_init(void);
 extern void rana_vk_terminate(void);
 
-extern i32  rana_vk_begin_frame(void);
+extern void rana_vk_begin_frame(void);
 extern void rana_vk_end_frame(void);
 
 /** Out arguments will be passed count of wanted device extensions, 
@@ -205,6 +205,7 @@ extern i32 rana_vk_copy_buffer(VkBuffer dst_buffer, VkBuffer src_buffer, VkDevic
 extern i32 rana_vk_create_vertex_buffer(void);
 extern i32 rana_vk_create_index_buffer(void);
 extern i32 rana_vk_create_uniform_buffers(void);
+extern void vulkan_update_uniform_buffer(u32 current_image);
 
 /* vk_descriptor.c */
 extern i32 rana_vk_create_descriptor_pool(void);
@@ -212,7 +213,10 @@ extern i32 rana_vk_create_descriptor_sets(void);
 
 /* vk_cmd.c */
 extern i32 rana_vk_create_command_buffers(void);
-extern i32 rana_vk_record_command_buffer(VkCommandBuffer cmd_buffer, u32 image_idx);
+extern i32 vulkan_record_command_buffer(VkCommandBuffer cmd_buffer, u32 image_idx);
+
+/* vk_draw.c */
+extern i32 rana_vk_draw_frame(Arena *swapchain_arena, Arena *temp_arena);
 
 /* up to date with version 1.3.294 */
 #if defined(VK_VERSION_1_0)

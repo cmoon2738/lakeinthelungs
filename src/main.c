@@ -42,6 +42,8 @@ static void run_mainloop(void)
     u64 time_now = sys_timer_counter();
     u64 time_last = 0;
 
+    f32 timer = 3000.f;
+
     while (!read_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT)) {
         time_last = time_now;
         time_now = sys_timer_counter();
@@ -66,7 +68,11 @@ static void run_mainloop(void)
         rana_end_frame();
 
         /* TODO testing */
-        set_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT);
+        //set_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT);
+        sys_sleep(10000);
+        timer = (f32)timer - AMW.delta_time;
+        if (timer < 0 || read_flags(hadal_get_flags(AMW.window), WINDOW_FLAG_SHOULD_CLOSE))
+            set_flags(AMW.flags, AMW_FLAG_SHOULD_QUIT);
     }
     /* When the main loop returns, the fiber job system 
      * will destroy all threads (except the main one) */

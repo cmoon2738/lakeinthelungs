@@ -132,21 +132,20 @@ void rana_terminate(void)
         terminate();
 }
 
-i32 rana_begin_frame(void)
+void rana_begin_frame(void)
 {
-    i32 result = AMW_SUCCESS;
+    if (!RANA.initialized)
+        return;
 
-    if (read_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED))
-        result = _rana_recreate_swapchain(&RANA.swapchain_arena);
-
-    /* TODO */
-
-    return result;
+    RANA.api.begin_frame();
 }
 
 void rana_end_frame(void)
 {
+    if (!RANA.initialized)
+        return;
 
+    RANA.api.end_frame();
 }
 
 
@@ -156,13 +155,10 @@ void rana_set_framebuffer_resized(void)
         set_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED);
 }
 
-i32 _rana_recreate_swapchain(Arena *swapchain_arena)
+i32 _rana_recreate_swapchain(Arena *swapchain_arena, Arena *temp_arena)
 {
-    i32 result = AMW_SUCCESS;
-    if (RANA.initialized) {
-        result = RANA.api.recreate_swapchain(swapchain_arena, &RANA.temporary_arena);
-        unset_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED);
-    }
+    i32 result = RANA.api.recreate_swapchain(swapchain_arena, temp_arena);
+    unset_flags(RANA.flags, RANA_FLAG_FRAMEBUFFER_RESIZED);
     return result;
 }
 

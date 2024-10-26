@@ -20,13 +20,18 @@ typedef struct {
     mat2 view;
 } UniformBufferObject;
 
+extern const Vertex CUBE_DEMO_VERTICES[];
+extern const size_t CUBE_DEMO_VERTICES_SIZE;
+extern const u16 CUBE_DEMO_INDICES[];
+extern const size_t CUBE_DEMO_INDICES_SIZE;
+
 typedef struct RanaAPI {
     u32   id;
 
     i32  (*init)(void);
     void (*terminate)(void);
     i32  (*recreate_swapchain)(Arena *swapchain_arena, Arena *temp_arena);
-    i32  (*begin_frame)(void);
+    void (*begin_frame)(void);
     void (*end_frame)(void);
 } RanaAPI;
 
@@ -49,6 +54,6 @@ extern RanaRenderer RANA;
 
 /* Internal API */
 extern bool _rana_debug_verify_api(const RanaAPI *api);
-extern i32  _rana_recreate_swapchain(Arena *swapchain_arena);
+extern i32  _rana_recreate_swapchain(Arena *swapchain_arena, Arena *temp_arena);
 
 #endif /* _AMW_renderer_h_ */
