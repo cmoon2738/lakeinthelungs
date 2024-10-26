@@ -80,7 +80,6 @@ typedef enum {
 
     /* layers, wanted in AMW_DEBUG only */
     RANA_VK_EXT_DEBUG_UTILS_BIT,                    /**< VK_EXT_debug_utils */
-    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT,       /**< VK_KHR_shader_non_semantic_info */
     RANA_VK_EXT_VALIDATION_LAYERS_BIT,              /**< VK_LAYER_KHRONOS_validation */
 
     /* device, all wanted */
@@ -89,18 +88,19 @@ typedef enum {
     RANA_VK_EXT_PUSH_DESCRIPTOR_BIT,                /**< VK_KHR_push_descriptor */
     RANA_VK_EXT_EXTENDED_DYNAMIC_STATE3_BIT,        /**< VK_EXT_extended_dynamic_state3 */
 
-    /* TODO deprecated extensions, but should be enabled only if running older api versions (1.2, 1.1) */
-    //RANA_VK_EXT_DYNAMIC_RENDERING_BIT,              /**< VK_KHR_dynamic_rendering */
-    //RANA_VK_EXT_SYNCHRONIZATION2_BIT,               /**< VK_KHR_synchronization2 */
-    //RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT,             /**< VK_KHR_timeline_semaphore */
-    //RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT,            /**< VK_EXT_descriptor_indexing */
-    //RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT,         /**< VK_EXT_extended_dynamic_state */
-    //RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT,        /**< VK_EXT_extended_dynamic_state2 */
-
     /* device, used if available */
     RANA_VK_EXT_DEFERRED_HOST_OPERATIONS_BIT,       /**< VK_KHR_deferred_host_operations */
     RANA_VK_EXT_ACCELERATION_STRUCTURE_BIT,         /**< VK_KHR_acceleration_structure */
     RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT,           /**< VK_KHR_ray_tracing_pipeline */
+
+    /* deprecated extensions, but should be enabled only if running older api versions (1.2, 1.1) */
+    RANA_VK_EXT_DYNAMIC_RENDERING_BIT,              /**< VK_KHR_dynamic_rendering */
+    RANA_VK_EXT_SYNCHRONIZATION2_BIT,               /**< VK_KHR_synchronization2 */
+    RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT,             /**< VK_KHR_timeline_semaphore */
+    RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT,            /**< VK_EXT_descriptor_indexing */
+    RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT,         /**< VK_EXT_extended_dynamic_state */
+    RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT,        /**< VK_EXT_extended_dynamic_state2 */
+    RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT,       /**< VK_KHR_shader_non_semantic_info */
 } VulkanExtensions;
 
 /* vk_validation.c */
@@ -117,7 +117,7 @@ extern i32 vulkan_find_device_memory_type(VkPhysicalDevice gpu, VkMemoryProperty
 
 /* Per context Vulkan state */
 typedef struct RanaVulkanContext {
-    VkSurfaceKHR surface;
+    VkQueue      graphics_queue;
     /* queue, swapchain, renderpasses & framebuffers/dynamic rendering, 
      * descriptors, pipeline, command buffers */
 } RanaVulkanContext;
@@ -127,12 +127,14 @@ typedef struct RanaVulkanRenderer {
     void   *module; /* drivers loaded at runtime */
     u64     ext_available;
     u64     ext_enabled;
+    u32     queue_family_index;
 
     VkInstance                  instance;
     VkPhysicalDevice            physical_device;
     VkPhysicalDeviceProperties  physical_device_properties;
     VkPhysicalDeviceFeatures    physical_device_features;
     VkDevice                    device;
+    VkSurfaceKHR                surface;
 } RanaVulkanRenderer;
 
 /* Rana backend API */

@@ -10,7 +10,7 @@
 
 #define AMW_VERSION_MAJOR 0
 #define AMW_VERSION_MINOR 1
-#define AMW_VERSION_REVISION 1
+#define AMW_VERSION_REVISION 2
 
 #define VERSION_NUM(major, minor, revision) \
     ((major) * 1000000 + (minor) * 1000 + (revision))
@@ -20,6 +20,9 @@
 #define VERSION_MAJOR(version) ((version) / 1000000)
 #define VERSION_MINOR(version) (((version) / 1000) % 1000)
 #define VERSION_REVISION(version) ((version) % 1000)
+
+#define _CONCAT_VERSIONSTR(ma,mi,rev) #ma "." #mi "." #rev
+#define MAKE_VERSIONSTR(ma,mi,rev) _CONCAT_VERSIONSTR(ma,mi,rev)
 
 #if !defined(AMW_NDEBUG) && !defined(AMW_DEBUG)
     #define AMW_NDEBUG 1
@@ -997,7 +1000,6 @@
 #else
     #define ARCH_ZARCH_CHECK(version) (0)
 #endif
-
 #if defined(ARCH_ZARCH) && defined(__VEC__)
   #define ARCH_ZARCH_ZVECTOR ARCH_ZARCH
 #endif
@@ -1216,11 +1218,11 @@
 #define toggle_flags(flags,mask) ((flags) ^= (mask))   /* toggle the specified flags */
 
 #define read_bit(flags,bit)     (flags & (1 << bit))   /* check for bit */
-#define set_bit(flags,bit)      (flags |= (1 << bit))  /* set the specified bits to 1 */
-#define unset_bit(flags,bit)    (flags &= ~(1 << bit)) /* set the specified bits to 0 */
-#define toggle_bit(flags,bit)   (flags ^= (1 << bit))  /* toggle the specified bits */
+#define set_bit(flags,bit)      (flags |= (1 << bit))  /* set the specified bit to 1 */
+#define unset_bit(flags,bit)    (flags &= ~(1 << bit)) /* set the specified bit to 0 */
+#define toggle_bit(flags,bit)   (flags ^= (1 << bit))  /* toggle the specified bit */
 
-#define bitmask(n) (((1 << (n)) -1 )) /* a bitstream of n length */
+#define bitmask(n) (((1 << (n)) - 1 )) /* a bitstream of n length */
 
 #ifndef false
     #define false 0
@@ -1231,6 +1233,7 @@
 #ifndef __cplusplus
     typedef _Bool           bool;
 #endif
+#define DONT_CARE -1
 
 typedef int8_t              i8;
 typedef int16_t             i16;
@@ -1718,5 +1721,7 @@ typedef enum {
     AMW_SUCCESS = 0,
     AMW_ERROR_STUB = -1, // FIXME update later all return code messages using this
 } AMWResult;
+
+extern char *a_moonlit_walk_version_string(void);
 
 #endif /* _LAKE_common_h_ */

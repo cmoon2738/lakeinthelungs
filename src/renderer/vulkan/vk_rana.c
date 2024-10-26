@@ -168,6 +168,8 @@ i32 rana_vk_init(void)
     if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_VALIDATION_LAYERS_BIT))
         vulkan_create_validation_layers(RANA.vk.instance);
 
+    RANA_VK_VERIFY(vulkan_create_surface(RANA.vk.instance, RANA.window, NULL, &RANA.vk.surface));
+
     /* this will only give the count of extensions saved in RANA.vk.ext_available */
     extension_count = 0;
     if (!rana_vk_select_physical_device(arena, 0, &extension_count))
@@ -190,6 +192,12 @@ i32 rana_vk_init(void)
 
     if (queue_graphics_family < 0)
         return AMW_ERROR_STUB;
+    RANA.vk.queue_family_index = queue_graphics_family;
+
+    if (!vulkan_physical_device_presentation_support(RANA.vk.physical_device, queue_graphics_family)) {
+        log_error("kurwa");
+        return AMW_ERROR_STUB;
+    }
 
     /* for now, just one queue */
     VkDeviceQueueCreateInfo queue_create_info[1];
@@ -197,7 +205,7 @@ i32 rana_vk_init(void)
     queue_create_info[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queue_create_info[0].pNext = NULL;
     queue_create_info[0].flags = 0;
-    queue_create_info[0].queueFamilyIndex = (u32)queue_graphics_family;
+    queue_create_info[0].queueFamilyIndex = RANA.vk.queue_family_index;
     queue_create_info[0].queueCount = 1;
     queue_create_info[0].pQueuePriorities = &queue_priority;
 
@@ -217,16 +225,32 @@ i32 rana_vk_init(void)
         device_extensions[i++] = "VK_KHR_acceleration_structure";
     if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT))
         device_extensions[i++] = "VK_KHR_ray_tracing_pipeline";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_DYNAMIC_RENDERING_BIT))
+        device_extensions[i++] = "VK_KHR_dynamic_rendering";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_SYNCHRONIZATION2_BIT))
+        device_extensions[i++] = "VK_KHR_synchronization2";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT))
+        device_extensions[i++] = "VK_KHR_timeline_semaphore";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT))
+        device_extensions[i++] = "VK_EXT_descriptor_indexing";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT))
+        device_extensions[i++] = "VK_EXT_extended_dynamic_state";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT))
+        device_extensions[i++] = "VK_EXT_extended_dynamic_state2";
+    if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT))
+        device_extensions[i++] = "VK_KHR_shader_non_semantic_info";
 
     log_debug("Enabled Vulkan device extensions:");
     for (i = 0; i < extension_count; i++)
         log_debug(" %3d %s", i, device_extensions[i]);
 
-    /* select the wanted physical device features to enable */
+    /* select the wanted physical device features to enable
+     * TODO this should be done in a better way */
     VkPhysicalDeviceFeatures device_features = {0};
     device_features.samplerAnisotropy = RANA.vk.physical_device_features.samplerAnisotropy;
     device_features.fillModeNonSolid = RANA.vk.physical_device_features.fillModeNonSolid;
     device_features.sampleRateShading = RANA.vk.physical_device_features.sampleRateShading;
+    device_features.geometryShader = RANA.vk.physical_device_features.geometryShader;
 
     VkDeviceCreateInfo device_create_info = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -258,6 +282,9 @@ void rana_vk_terminate(void)
 
     if (RANA.vk.device != VK_NULL_HANDLE)
         vkDestroyDevice(RANA.vk.device, NULL);
+
+    if (RANA.vk.surface != VK_NULL_HANDLE)
+        vkDestroySurfaceKHR(RANA.vk.instance, RANA.vk.surface, NULL);
 
     if (read_bit(RANA.vk.ext_enabled, RANA_VK_EXT_VALIDATION_LAYERS_BIT))
         vulkan_destroy_validation_layers(RANA.vk.instance);

@@ -62,11 +62,26 @@ static u64 supported_device_extensions(Arena *arena, const VkPhysicalDevice *pd)
             set_bit(ext_bits, RANA_VK_EXT_ACCELERATION_STRUCTURE_BIT);
             set_bit(ext_bits, RANA_VK_EXT_DEFERRED_HOST_OPERATIONS_BIT);
         }
+        if (vulkan_has_extension(extensions, count, "VK_KHR_dynamic_rendering"))
+            set_bit(ext_bits, RANA_VK_EXT_DYNAMIC_RENDERING_BIT);
+        if (vulkan_has_extension(extensions, count, "VK_KHR_synchronization2"))
+            set_bit(ext_bits, RANA_VK_EXT_SYNCHRONIZATION2_BIT);
+        if (vulkan_has_extension(extensions, count, "VK_KHR_timeline_semaphore"))
+            set_bit(ext_bits, RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT);
+        if (vulkan_has_extension(extensions, count, "VK_EXT_descriptor_indexing"))
+            set_bit(ext_bits, RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT);
+        if (vulkan_has_extension(extensions, count, "VK_EXT_extended_dynamic_state"))
+            set_bit(ext_bits, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT);
+        if (vulkan_has_extension(extensions, count, "VK_EXT_extended_dynamic_state2"))
+            set_bit(ext_bits, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT);
+        if (vulkan_has_extension(extensions, count, "VK_KHR_shader_non_semantic_info"))
+            set_bit(ext_bits, RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT);
     }
     
     /* check for required extensions */
     if(!read_flags(ext_bits, 
             (1 << RANA_VK_EXT_SWAPCHAIN_BIT)
+          | (1 << RANA_VK_EXT_DYNAMIC_RENDERING_BIT)
     )) {
         return 0;
     }
@@ -109,8 +124,7 @@ static i32 select_best_gpu(Arena *arena,
                            VkPhysicalDevice *pds, 
                            i32 preferred_idx, 
                            i32 pd_count,
-                           u64 *ext_bits_out,
-                           u32 *ext_count_out)
+                           u64 *ext_bits_out)
 {
     VkPhysicalDeviceProperties pd_props;
     u32 queue_family_count = 0;
@@ -137,8 +151,10 @@ static i32 select_best_gpu(Arena *arena,
             continue;
 
         /* no presentation support? */
-        //if (!vulkan_physical_device_presentation_support(pds[i], queue_family_count))
+        //if (!vulkan_physical_device_presentation_support(pds[i], queue_family_count)) {
+        //    log_debug("Vulkan device no presentation support, make sure Hadal is initialized.");
         //    continue;
+        //}
 
         /* prefer discrete GPU, but if it's the only one available then don't be picky...
          * also if the user specifies a preferred device, select it */
@@ -164,14 +180,10 @@ static i32 select_best_gpu(Arena *arena,
     if (best_idx >= 0) {
         if (ext_bits_out)
             *ext_bits_out = ext_bits[best_idx];
-        if (ext_count_out)
-            *ext_count_out = count_bits(ext_bits[best_idx]);
     } else {
         /* no suitable device found */
         if (ext_bits_out)
             *ext_bits_out = 0;
-        if (ext_count_out)
-            *ext_count_out = 0;
     }
     return best_idx;
 }
@@ -198,7 +210,7 @@ bool rana_vk_select_physical_device(Arena *arena, i32 preferred_device_idx, u32 
 
     i32 idx = select_best_gpu(arena, pds,
                     preferred_device_idx < (i32)pd_count ? preferred_device_idx : -1, 
-                    pd_count, &ext_bits, ext_count);
+                    pd_count, &ext_bits);
 
     if (idx < 0 || ext_bits == 0) {
         log_error("Could not find a suitable GPU.");
@@ -209,24 +221,61 @@ bool rana_vk_select_physical_device(Arena *arena, i32 preferred_device_idx, u32 
     mask_flags(RANA.vk.ext_available, bitmask(RANA_VK_EXT_SWAPCHAIN_BIT));
     set_flags(RANA.vk.ext_available, ext_bits);
     mask_flags(RANA.vk.ext_enabled, bitmask(RANA_VK_EXT_SWAPCHAIN_BIT));
-    set_flags(RANA.vk.ext_enabled, ext_bits);
+
+    /* resolve extensions and backwards compatibility */
+    if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_SWAPCHAIN_BIT))
+        set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_SWAPCHAIN_BIT);
+    if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_MULTI_DRAW_INDIRECT_BIT))
+        set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_MULTI_DRAW_INDIRECT_BIT);
+    if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_PUSH_DESCRIPTOR_BIT))
+        set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_PUSH_DESCRIPTOR_BIT);
+    if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE3_BIT))
+        set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE3_BIT);
+    if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT)) {
+        set_flags(RANA.vk.ext_enabled, 
+                (1 << RANA_VK_EXT_RAY_TRACING_PIPELINE_BIT)
+              | (1 << RANA_VK_EXT_ACCELERATION_STRUCTURE_BIT)
+              | (1 << RANA_VK_EXT_DEFERRED_HOST_OPERATIONS_BIT));
+    }
+    /* https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_VERSION_1_3.html */
+    if (vulkan_version() < VK_API_VERSION_1_3) {
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_DYNAMIC_RENDERING_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_DYNAMIC_RENDERING_BIT);
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_SYNCHRONIZATION2_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_SYNCHRONIZATION2_BIT);
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE_BIT);
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_EXTENDED_DYNAMIC_STATE2_BIT);
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_SHADER_NON_SEMANTIC_INFO_BIT);
+    /* https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_VERSION_1_2.html */
+    } else if (vulkan_version() < VK_API_VERSION_1_2) {
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_TIMELINE_SEMAPHORE_BIT);
+        if (read_bit(RANA.vk.ext_available, RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT))
+            set_bit(RANA.vk.ext_enabled, RANA_VK_EXT_DESCRIPTOR_INDEXING_BIT);
+    }
     RANA.vk.physical_device = pds[idx];
+
+    if (ext_count)
+        *ext_count = count_bits((RANA.vk.ext_enabled) & ~(bitmask(RANA_VK_EXT_SWAPCHAIN_BIT)));
 
     vkGetPhysicalDeviceFeatures(RANA.vk.physical_device, &RANA.vk.physical_device_features);
     vkGetPhysicalDeviceProperties(RANA.vk.physical_device, &RANA.vk.physical_device_properties);
 
-    u32 vv_major = (RANA.vk.physical_device_properties.apiVersion >> 22);
-    u32 vv_minor = (RANA.vk.physical_device_properties.apiVersion >> 12) & 0x3ff;
-    u32 vv_patch = (RANA.vk.physical_device_properties.apiVersion) & 0xfff;
-    u32 dv_major = (RANA.vk.physical_device_properties.driverVersion >> 22);
-    u32 dv_minor = (RANA.vk.physical_device_properties.driverVersion >> 12) & 0x3ff;
-    u32 dv_patch = (RANA.vk.physical_device_properties.driverVersion) & 0xfff;
+    u32 vv_major = (RANA.vk.physical_device_properties.apiVersion >> 22U);
+    u32 vv_minor = (RANA.vk.physical_device_properties.apiVersion >> 12U) & 0x3ffU;
+    u32 vv_patch = (RANA.vk.physical_device_properties.apiVersion) & 0xfffU;
+    u32 dv_major = (RANA.vk.physical_device_properties.driverVersion >> 22U);
+    u32 dv_minor = (RANA.vk.physical_device_properties.driverVersion >> 12U) & 0x3ffU;
+    u32 dv_patch = (RANA.vk.physical_device_properties.driverVersion) & 0xfffU;
     const char *device_type = device_type_string(RANA.vk.physical_device_properties.deviceType);
 
-    log_debug("Selected Vulkan device: %s", RANA.vk.physical_device_properties.deviceName);
-    log_debug("    Device type: %s, ID: %X", device_type, RANA.vk.physical_device_properties.deviceID);
-    log_debug("    Vendor: %s, ID: %X", vendor_name_string(RANA.vk.physical_device_properties.vendorID), RANA.vk.physical_device_properties.vendorID);
-    log_debug("    Supported API version: %u.%u.%u", vv_major, vv_minor, vv_patch);
-    log_debug("    Driver version: %u.%u.%u", dv_major, dv_minor, dv_patch);
+    log_info("Selected Vulkan device: %s", RANA.vk.physical_device_properties.deviceName);
+    log_info("    Device type: %s, ID: %X", device_type, RANA.vk.physical_device_properties.deviceID);
+    log_info("    Vendor: %s, ID: %X", vendor_name_string(RANA.vk.physical_device_properties.vendorID), RANA.vk.physical_device_properties.vendorID);
+    log_info("    Supported API version: %u.%u.%u", vv_major, vv_minor, vv_patch);
+    log_info("    Driver version: %u.%u.%u", dv_major, dv_minor, dv_patch);
     return true;
 }

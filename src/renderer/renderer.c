@@ -96,10 +96,6 @@ static void terminate(void)
 {
     log_verbose("RANA: terminating...");
 
-    for (RanaContext *context = RANA.context_list_head; context; context = context->next) {
-        rana_destroy_context(context);
-    }
-
     if (RANA.api.terminate)
         RANA.api.terminate();
 
@@ -107,7 +103,7 @@ static void terminate(void)
     zero(RANA);
 }
 
-i32 rana_init(u32 backend_id)
+i32 rana_init(u32 backend_id, Window *window)
 {
     log_verbose("RANA: initializing...");
 
@@ -117,7 +113,13 @@ i32 rana_init(u32 backend_id)
     if (!select_backend(backend_id))
         return AMW_ERROR_STUB;
 
-    RANA.api.init();
+    assert_debug(window);
+    RANA.window = window;
+
+    if (RANA.api.init() != AMW_SUCCESS) {
+        log_error("Can't initialize the renderer.");
+        return AMW_ERROR_STUB;
+    }
 
     RANA.initialized = true;
     return AMW_SUCCESS;

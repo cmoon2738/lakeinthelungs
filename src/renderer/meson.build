@@ -1,6 +1,5 @@
 sources += files(
     'renderer.c',
-    'context.c',
 )
 
 if sys == 'emscripten'

@@ -4,7 +4,7 @@
 
 Hadopelagic HADAL = {0};
 
-static const char *backend_string(u32 id)
+const char *backend_string(u32 id)
 {
     switch (id) {
         case HADAL_BACKEND_WIN32: return "win32";
@@ -119,7 +119,7 @@ static void terminate(void)
 {
     log_verbose("HADAL: terminating...");
 
-    for (Window *window = HADAL.window_list_head; window; window = window->next) {
+    for (Window *window = HADAL.window_list_head; window != NULL; window = window->next) {
         hadal_destroy_window(window);
     }
 
@@ -171,6 +171,10 @@ bool _hadal_debug_verify_api(const HadalAPI *api)
 
     HADAL_APICHECK(init)
     HADAL_APICHECK(terminate)
+    HADAL_APICHECK(create_window)
+    HADAL_APICHECK(destroy_window)
+    HADAL_APICHECK(show_window)
+    HADAL_APICHECK(hide_window)
 #ifdef AMW_NATIVE_VULKAN
     HADAL_APICHECK(vkPhysicalDevicePresentationSupport)
     HADAL_APICHECK(vkCreateSurface)

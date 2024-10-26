@@ -1,5 +1,5 @@
-#ifndef _LAKE_rana_h_
-#define _LAKE_rana_h_
+#ifndef _AMW_rana_h_
+#define _AMW_rana_h_
 
 #include "../common.h"
 #include "../platform/hadal.h"
@@ -18,15 +18,7 @@ typedef enum {
 extern u32  rana_current_backend_id(void);
 extern bool rana_backend_is_supported(u32 backend_id);
 
-extern i32  rana_init(u32 backend_id);
+extern i32  rana_init(u32 backend_id, Window *window);
 extern void rana_terminate(void);
 
-/** Opaque handle for the rendering context. */
-typedef struct RanaContext RanaContext;
-
-extern RanaContext *rana_create_context(Window *window);
-extern void         rana_destroy_context(RanaContext *rana);
-extern u32          rana_get_flags(RanaContext *rana);
-
-
-#endif /* _LAKE_rana_h_ */
+#endif /* _AMW_rana_h_ */

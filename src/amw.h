@@ -31,7 +31,6 @@ typedef struct AMWEngine {
 
     AppDescription *app;
     Window         *window;
-    RanaContext    *rana;
 } AMWEngine;
 
 /** Global 'A Moonlit Walk' engine state context */

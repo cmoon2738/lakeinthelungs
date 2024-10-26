@@ -6,22 +6,11 @@
 
 #ifdef AMW_NATIVE_VULKAN
     #include "vulkan/vk.h"
-    #define RANA_VK_CONTEXT_STATE RanaVulkanContext vk;
     #define RANA_VK_GLOBAL_STATE RanaVulkanRenderer vk;
 #else
-    #define RANA_VK_CONTEXT_STATE
     #define RANA_VK_GLOBAL_STATE
 #endif /* LAKE_NATIVE_VULKAN */
 
-struct RanaContext {
-    RanaContext *next;
-    u32          flags;
-
-    /* window whose surface is binded to the rendering context */
-    Window      *window;
-
-    RANA_VK_CONTEXT_STATE
-};
 
 typedef struct RanaAPI {
     u32   id;
@@ -34,7 +23,7 @@ typedef struct RanaRenderer {
     bool            initialized;
     RanaAPI         api;
 
-    RanaContext    *context_list_head;
+    Window         *window;
     Arena           temporary_arena;
 
     RANA_VK_GLOBAL_STATE
